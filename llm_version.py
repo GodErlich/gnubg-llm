@@ -8,7 +8,7 @@ import dotenv
 dotenv.load_dotenv()
 
 # Set up logging
-LOG_FILE = os.path.join(os.getcwd(), "gnubg_game.log")
+LOG_FILE = os.path.join(os.getcwd(), "llm_log.log")
 
 # LLM API configuration
 LLM_API_URL = os.getenv("LLM_API_URL")
@@ -196,10 +196,15 @@ def get_moves_with_fallbacks():
 def call_openai_api(prompt):
     """Call the OpenAI API"""
     try:
-        url = LLM_API_URL + "/chat/completions"
+        base_url = os.getenv("LLM_API_URL")
+        deployment = "gpt-4o"
+        api_version = "2024-08-06"
+
+        url = f"{base_url}/openai/deployments/{deployment}/chat/completions?api-version={api_version}"
+
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {LLM_API_KEY}",
+            "api-key": os.getenv("LLM_API_KEY"),
         }
 
         data = {
@@ -211,19 +216,87 @@ def call_openai_api(prompt):
                 },
                 {"role": "user", "content": prompt},
             ],
-            "temperature": 0.3,
-            "max_tokens": 1000,
+            "temperature": 0.1,
+            "max_tokens": 8000,
         }
 
         response = requests.post(url, headers=headers, json=data)
-
         if response.status_code == 200:
-            return response.json()
+            result = response.json()
+            message = result["choices"][0]["message"]["content"]
+            print("Assistant:", message.strip())
+            return result
         else:
-            log_message(f"API error: {response.status_code}, {response.text}")
+            print(f"Status: {response.status_code}")
+            print(f"Error: {response.text}")
             return None
+
     except Exception as e:
         log_message(f"Error calling API: {e}")
+        return None
+
+
+def extract_move_from_llm_response(response, possible_moves):
+    """Extract the recommended move from the LLM response"""
+    try:
+        if not response or "choices" not in response:
+            return None
+
+        content = response["choices"][0]["message"]["content"]
+        log_message(f"LLM response: {content}")
+
+        # Look for a section that might contain the recommended move
+        # This is a simple extraction approach - can be refined based on actual responses
+
+        # Look for specific markers
+        markers = [
+            "RECOMMENDED MOVE:",
+            "RECOMMENDED_MOVE:",
+            "I recommend:",
+            "Best move:",
+            "Optimal move:",
+            "My recommendation:",
+        ]
+
+        for marker in markers:
+            if marker in content:
+                # Split by the marker and take the text immediately after
+                parts = content.split(marker)
+                if len(parts) > 1:
+                    # Take the first line after the marker
+                    recommendation = parts[1].strip().split("\n")[0].strip()
+
+                    # Clean up the recommendation (remove punctuation, etc.)
+                    for char in [".", ",", ":", ";", '"', "'"]:
+                        recommendation = recommendation.replace(char, "")
+
+                    recommendation = recommendation.strip()
+                    log_message(f"Extracted move: '{recommendation}'")
+
+                    # Try to match with available moves
+                    for move in possible_moves:
+                        if move["move"] == recommendation:
+                            return move
+
+                    # Try partial matching
+                    for move in possible_moves:
+                        if (
+                            recommendation in move["move"]
+                            or move["move"] in recommendation
+                        ):
+                            return move
+
+        # If we couldn't find a clear recommendation, try to find any move notation in the text
+        for move in possible_moves:
+            if move["move"] in content:
+                log_message(f"Found move match in content: {move['move']}")
+                return move
+
+        # No clear recommendation found
+        log_message("No clear move recommendation found in response")
+        return None
+    except Exception as e:
+        log_message(f"Error extracting move from response: {e}")
         return None
 
 
@@ -298,48 +371,6 @@ def consult_llm(board_repr, game_context, possible_moves):
         if possible_moves:
             return max(possible_moves, key=lambda x: x.get("equity", -999))
         return None
-
-
-# def consult_llm_first(board_repr, game_context, possible_moves):
-
-#     # Format prompt
-#     prompt = f"""
-#     Current backgammon board state:
-#     {json.dumps(board_repr, indent=2)}
-
-#     Game context:
-#     Dice: {game_context.get('dice', 'Unknown')}
-#     Position evaluation: {game_context.get('evaluation', 'Unknown')}
-#     Pip count: {game_context.get('pip_count', 'Unknown')}
-
-#     Available moves (with equity values, higher is better):
-#     {json.dumps(possible_moves, indent=2)}
-
-#     Based on this position, recommend the best move with reasoning.
-#     """
-
-#     response = openai.ChatCompletion.create(
-#         model="gpt-4",
-#         api_key=LLM_API_KEY,
-#         messages=[
-#             {"role": "system", "content": "You are an expert backgammon assistant."},
-#             {"role": "user", "content": prompt},
-#         ],
-#     )
-
-#     # Extract response
-#     llm_response = response.choices[0].message.content
-
-#     # Process response to extract move recommendation
-#     # You'll need to implement parsing logic based on response format
-
-#     # For now, simple approach - look for move patterns
-#     for move in possible_moves:
-#         if move["move"] in llm_response:
-#             return move
-
-#     # Default to highest equity move
-#     return max(possible_moves, key=lambda x: x.get("equity", -999))
 
 
 def play_llm_move():
@@ -444,76 +475,88 @@ def is_game_over():
 def play_full_game():
     """Play a full game with our LLM-enhanced logic"""
     # Clear or create log file
-    with open(LOG_FILE, "w") as f:
-        f.write("Starting GnuBG LLM-Enhanced Game\n")
-        f.write("-------------------------------\n")
-
-    log_message("Starting a new game")
-
-    # Start a new game
-    gnubg.command("new game")
-
-    # Set up player 0 as human and player 1 as human (computer vs computer)
-    gnubg.command("set player 0 human")
-    gnubg.command("set player 1 human")
-    log_message("Set up player 0 and player 1 as human (LLM vs human)")
-
-    # Main game loop - limited to 200 turns to prevent infinite loops
-    max_turns = 200
-    turn_count = 0
-
-    while turn_count < max_turns and not is_game_over():
-        turn_count += 1
-        log_message(f"\n--- Turn {turn_count} ---")
-
-        log_message("Rolling dice")
-        gnubg.command("roll")
-
-        log_message("Using LLM-enhanced move selection")
-        # Try to roll if needed
-        try:
-            # Check if we need to roll dice
-            posinfo = None
-            try:
-                posinfo = gnubg.posinfo()
-            except:
-                log_message("Could not get posinfo, might need to roll")
-
-            # If we couldn't get posinfo or if there are no dice, roll
-            if not posinfo or "dice" not in posinfo or not posinfo["dice"]:
-                log_message("Rolling dice")
-                try:
-                    gnubg.command("roll")
-                except:
-                    log_message("Error rolling dice")
-
-            # Play our LLM-recommended move
-            play_llm_move()
-        except Exception as e:
-            log_message(f"Error during LLM-enhanced turn: {e}")
-            # Fallback to regular play
-            try:
-                gnubg.command("play")
-            except:
-                log_message("Error with fallback play command")
-
-        # Short pause between turns for stability
-        time.sleep(0.8)
-
-    if turn_count >= max_turns:
-        log_message("Maximum turn count reached, ending game")
-
-    # Get final game information
     try:
-        match_info = gnubg.match()
-        if "games" in match_info and match_info["games"]:
-            latest_game = match_info["games"][-1]
-            log_message(f"Final game info: {latest_game.get('info', {})}")
-    except Exception as e:
-        log_message(f"Error getting final match info: {e}")
+        with open(LOG_FILE, "w") as f:
+            f.write("Starting GnuBG LLM-Enhanced Game\n")
+            f.write("-------------------------------\n")
 
-    log_message("Game completed")
+        log_message("Starting a new game")
+
+        # Start a new game
+        gnubg.command("new game")
+
+        # Set up player 0 as human and player 1 as human (computer vs computer)
+        gnubg.command("set player 0 human")
+        gnubg.command("set player 1 human")
+        log_message("Set up player 0 and player 1 as human (LLM vs human)")
+
+        # Main game loop - limited to 200 turns to prevent infinite loops
+        max_turns = 200
+        turn_count = 0
+
+        while turn_count < max_turns and not is_game_over():
+            turn_count += 1
+            log_message(f"\n--- Turn {turn_count} ---")
+
+            log_message("Rolling dice")
+            gnubg.command("roll")
+
+            log_message("Using LLM-enhanced move selection")
+            # Try to roll if needed
+            try:
+                # Check if we need to roll dice
+                posinfo = None
+                try:
+                    posinfo = gnubg.posinfo()
+                except:
+                    log_message("Could not get posinfo, might need to roll")
+
+                # If we couldn't get posinfo or if there are no dice, roll
+                if not posinfo or "dice" not in posinfo or not posinfo["dice"]:
+                    log_message("Rolling dice")
+                    try:
+                        gnubg.command("roll")
+                    except:
+                        log_message("Error rolling dice")
+
+                # Play our LLM-recommended move
+                play_llm_move()
+            except Exception as e:
+                log_message(f"Error during LLM-enhanced turn: {e}")
+                # Fallback to regular play
+                try:
+                    gnubg.command("play")
+                except:
+                    log_message("Error with fallback play command")
+
+            # Short pause between turns for stability
+            time.sleep(0.8)
+
+        if turn_count >= max_turns:
+            log_message("Maximum turn count reached, ending game")
+
+        # Get final game information
+        try:
+            match_info = gnubg.match()
+            if "games" in match_info and match_info["games"]:
+                latest_game = match_info["games"][-1]
+                log_message(f"Final game info: {latest_game.get('info', {})}")
+        except Exception as e:
+            log_message(f"Error getting final match info: {e}")
+
+        log_message("Game completed")
+    except Exception as e:
+        log_message(f"Error in play_full_game: {e}")
+        import traceback
+
+        log_message(traceback.format_exc())
 
 
 # Start the game
-play_full_game()
+try:
+    play_full_game()
+except Exception as e:
+    log_message(f"Error in main: {e}")
+    import traceback
+
+    log_message(traceback.format_exc())
