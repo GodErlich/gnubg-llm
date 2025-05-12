@@ -198,7 +198,7 @@ def call_openai_api(prompt):
     try:
         base_url = os.getenv("LLM_API_URL")
         deployment = "gpt-4o"
-        api_version = "2024-08-06"
+        api_version = "2024-02-15-preview"
 
         url = f"{base_url}/openai/deployments/{deployment}/chat/completions?api-version={api_version}"
 
@@ -476,9 +476,6 @@ def play_full_game():
     """Play a full game with our LLM-enhanced logic"""
     # Clear or create log file
     try:
-        with open(LOG_FILE, "w") as f:
-            f.write("Starting GnuBG LLM-Enhanced Game\n")
-            f.write("-------------------------------\n")
 
         log_message("Starting a new game")
 
