@@ -304,14 +304,18 @@ def format_board_for_llm():
     dice = posinfo["dice"]
     turn = posinfo["turn"]
     board_state = []
-    o = board_tuple[0]
-    x = board_tuple[1]
+
+    o = board_tuple[0 if turn == 1 else 1]
+    x = board_tuple[1 if turn == 1 else 0]
     for i in range(0, 24):
+        x_pos = i if turn == 1 else 23 - i
+        o_pos = 23 - i if turn == 1 else i
+
         pos = i + 1
-        if x[i] > 0:
-            board_state.append(f"{pos}: X has {x[i]}")
-        elif o[23 - i] > 0:
-            board_state.append(f"{pos}: O has {o[23-i]}")
+        if x[x_pos] > 0:
+            board_state.append(f"{pos}: X has {x[x_pos]}")
+        elif o[o_pos] > 0:
+            board_state.append(f"{pos}: O has {o[o_pos]}")
         else:
             board_state.append(f"{pos}: empty")
 
@@ -335,22 +339,14 @@ def consult_llm(board_repr, game_context, possible_moves):
     """Send game state to LLM and get move recommendation"""
     try:
         # Format dice for better readability
-        dice_str = "Unknown"
-        if game_context.get("dice"):
-            dice = game_context.get("dice")
-            if isinstance(dice, list) and len(dice) == 2:
-                dice_str = f"{dice[0]},{dice[1]}"
-
         # Prepare a structured prompt
         prompt = f"""
             You are an expert backgammon AI assistant. Analyze the current board position and recommend the best move.
 
             CURRENT BOARD:
-            {board_repr.get('visual', 'No visual representation')}
+            {format_board_for_llm()}
 
             GAME CONTEXT:
-            - Dice: {dice_str}
-            - Current player: {game_context.get('player', 'Unknown')}
             - Pip count: {json.dumps(game_context.get('pip_count', 'Unknown'))}
             - Position evaluation: {json.dumps(game_context.get('evaluation', 'Unknown'))}
 
