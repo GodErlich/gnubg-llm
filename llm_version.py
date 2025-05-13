@@ -223,8 +223,6 @@ def call_openai_api(prompt):
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 200:
             result = response.json()
-            message = result["choices"][0]["message"]["content"]
-            print("Assistant:", message.strip())
             return result
         else:
             print(f"Status: {response.status_code}")
@@ -300,6 +298,35 @@ def extract_move_from_llm_response(response, possible_moves):
         return None
 
 
+def format_board_for_llm(board_tuple, dice, turn):
+    board_state = []
+    o = board_tuple[0]
+    x = board_tuple[1]
+    for i in range(0, 24):
+        pos = i + 1
+        if x[i] > 0:
+            board_state.append(f"{pos}: X has {x[i]}")
+        elif o[23 - i] > 0:
+            board_state.append(f"{pos}: O has {o[23-i]}")
+        else:
+            board_state.append(f"{pos}: empty")
+
+    # bar are in pos 24(i think)
+
+    bar_X = x[24]
+    bar_O = o[24]
+
+    on_bar = f"Bar: X has {bar_X}, O has {bar_O}"
+    dice_str = f"Dice rolled: {dice[0]} and {dice[1]}"
+    player = "X" if turn == 1 else "O"
+
+    return f"""Backgammon board state:
+            {chr(10).join(board_state)}
+            {on_bar}
+            {dice_str}
+            It's {player}'s turn."""
+
+
 def consult_llm(board_repr, game_context, possible_moves):
     """Send game state to LLM and get move recommendation"""
     try:
@@ -323,12 +350,12 @@ def consult_llm(board_repr, game_context, possible_moves):
             - Pip count: {json.dumps(game_context.get('pip_count', 'Unknown'))}
             - Position evaluation: {json.dumps(game_context.get('evaluation', 'Unknown'))}
 
-            AVAILABLE MOVES (with equity values, higher is better):
+            AVAILABLE MOVES:
             """
 
         # Add move options with clear numbering
         for i, move in enumerate(possible_moves):
-            prompt += f"{i+1}. Move: {move['move']} (Equity: {move.get('equity', 'Unknown')})\n"
+            prompt += f"{i+1}. Move: {move['move']}\n"
 
         prompt += """
             Based on this position, analyze the strategic implications of each move, considering:
@@ -344,7 +371,7 @@ def consult_llm(board_repr, game_context, possible_moves):
 
             Provide your reasoning after the recommendation.
         """
-
+        log_message(f"Prompt: {prompt}")
         # Call the LLM API
         llm_response = call_openai_api(prompt)
 
