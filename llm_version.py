@@ -298,7 +298,11 @@ def extract_move_from_llm_response(response, possible_moves):
         return None
 
 
-def format_board_for_llm(board_tuple, dice, turn):
+def format_board_for_llm():
+    board_tuple = gnubg.board()
+    posinfo = gnubg.posinfo()
+    dice = posinfo["dice"]
+    turn = posinfo["turn"]
     board_state = []
     o = board_tuple[0]
     x = board_tuple[1]
