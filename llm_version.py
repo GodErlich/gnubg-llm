@@ -100,7 +100,7 @@ def get_game_context():
 def get_moves_with_fallbacks():
     """Try multiple methods to get possible moves"""
     moves = []
-
+    gnubg.command("roll")
     # Method 1: Try using hint()
     try:
         log_message("Trying to get moves using hint()")
@@ -335,6 +335,132 @@ def format_board_for_llm():
             It's {player}'s turn."""
 
 
+def get_decision_prompt():
+    # Extract the list of moves from the hint data
+    board_description = format_board_for_llm()
+    hint_data = gnubg.hint()
+    moves = hint_data["hint"]
+
+    # Format the possible moves with their evaluations
+    formatted_moves = []
+    for move_info in moves:
+        # Get the move in readable format
+        move_desc = f"Move {move_info['movenum']}: {move_info['move']}"
+
+        # Get the probabilities
+        probs = move_info["details"]["probs"]
+        win_prob = probs[0] * 100
+        gammon_win = probs[1] * 100
+        gammon_loss = probs[3] * 100
+
+        # Get the overall equity (higher is better for the player)
+        equity = move_info["equity"]
+
+        # Get the equity difference from the best move
+        equity_diff = move_info["eqdiff"]
+
+        # Format the evaluation description
+        eval_desc = (
+            f"Win: {win_prob:.1f}%, Gammon win: {gammon_win:.1f}%, "
+            f"Gammon loss: {gammon_loss:.1f}%, Equity: {equity:.4f}, "
+            # f"Diff from best: {equity_diff:.4f}"
+        )
+
+        formatted_moves.append(f"{move_desc}\n{eval_desc}")
+
+    moves_text = "\n\n".join(formatted_moves)
+
+    # Create the complete prompt
+    prompt = f"""
+    You are an expert backgammon player choosing the best move in this position.
+    You have never lost against gnubg because of your superior strategy.
+    
+    # Current Board Position
+    {board_description}
+    
+    # Possible Moves (with gnubg evaluations)
+    {moves_text}
+    
+    # Instructions
+    Choose the best move for this position, drawing on both:
+    1. Your knowledge of backgammon strategy and tactical patterns
+    2. The statistical evaluations from gnubg (shown above)
+    
+    Consider these factors that might not be fully captured in gnubg's evaluation:
+    - Position type (racing, priming, back game, holding game)
+    - Tactical patterns (slots, hits, anchors, builders)
+    - Checker distribution and flexibility
+    - Safety vs. aggression balance
+    - Future roll equity
+    
+    Your analysis should:
+    1. Discuss the best move according to your superior knowledge of backgammon.
+    2. Identify any strategic patterns or special features of this position
+    3. Explain whether you agree or disagree with gnubg's evaluation and why
+    
+    Remember that negative equity values mean the position is disadvantageous for the player.
+    Lower (more negative) values indicate worse moves in this context.
+    
+    Begin with a brief assessment of the position and what key objectives you see.
+    
+    Conclude with your recommended move in this exact format:
+    RECOMMENDED MOVE: [move notation as shown in the options]
+    """
+
+    return prompt
+
+
+def get_backgammon_prompt(board_description, possible_moves_data, match_info=None):
+    # Format the possible moves with their evaluations
+    formatted_moves = []
+    for i, move in enumerate(possible_moves_data):
+        move_desc = f"Move {i+1}: {move['move']}"
+        win_prob = move["probs"][0] * 100
+        gammon_win = move["probs"][1] * 100
+        gammon_loss = move["probs"][3] * 100
+        score = move["score"]
+
+        eval_desc = f"Win: {win_prob:.1f}%, Gammon win: {gammon_win:.1f}%, Gammon loss: {gammon_loss:.1f}%, Score: {score:.4f}"
+        formatted_moves.append(f"{move_desc}\n{eval_desc}")
+
+    moves_text = "\n\n".join(formatted_moves)
+
+    # Create the complete prompt
+    prompt = f"""
+    You are an expert backgammon player analyzing the current position.
+    
+    # Current Board Position
+    {board_description}
+    
+    # Possible Moves (with gnubg evaluations)
+    {moves_text}
+    
+    # Instructions
+    Analyze this backgammon position and recommend the best move, drawing on both:
+    1. The statistical evaluations from gnubg (shown above)
+    2. Your knowledge of backgammon strategy and tactical patterns
+    
+    Consider these factors that might not be fully captured in gnubg's evaluation:
+    - Position type (racing, priming, back game, holding game)
+    - Tactical patterns (slots, hits, anchors, builders)
+    - Checker distribution and flexibility
+    - Safety vs. aggression balance
+    - Future roll equity
+    
+    Your analysis should:
+    1. Discuss the top 3 moves according to gnubg
+    2. Identify any strategic patterns or special features of this position
+    3. Explain whether you agree or disagree with gnubg's evaluation and why
+    
+    While gnubg's evaluation is valuable, you should apply your backgammon knowledge to determine if there are strategic considerations that might make another move preferable.
+    
+    Conclude with your recommended move in this exact format:
+    RECOMMENDED MOVE: ((point_from, point_to), (point_from, point_to))
+    """
+
+    return prompt
+
+
 def consult_llm(board_repr, game_context, possible_moves):
     """Send game state to LLM and get move recommendation"""
     try:
@@ -371,8 +497,8 @@ def consult_llm(board_repr, game_context, possible_moves):
 
             Provide your reasoning after the recommendation.
         """
+        prompt = get_decision_prompt()
         log_message(f"Prompt: {prompt}")
-        # Call the LLM API
         llm_response = call_openai_api(prompt)
 
         # Extract the recommended move
