@@ -1,0 +1,12 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  gnubg-app:
+    build: .
+    volumes:
+      - ./output:/app/output  # Mount for output files
+      - ./input:/app/input    # Mount for input files
+    environment:
+      - DISPLAY=${DISPLAY}    # For GUI if needed
+    stdin_open: true
+    tty: true
