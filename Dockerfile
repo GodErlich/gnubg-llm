@@ -67,20 +67,19 @@ RUN pip3 install PyGreSQL PyMySQL || echo "Database libraries failed - continuin
 RUN pip3 install --no-cache-dir -r requirements.txt || echo "Some packages failed - continuing"
 
 # Copy your Python script and configuration files
-COPY your_script.py .
+COPY llm_version.py .
 COPY .env .
-COPY gnubg_config/ ./gnubg_config/
 
 # Set environment variables for gnubg
 ENV GNUBG_DIR=/usr/local/share/gnubg
 ENV PATH="/usr/local/bin:${PATH}"
 
-# Create gnubg user directory and copy configs
+# Create gnubg user directory
 RUN mkdir -p /root/.gnubg && \
-    cp -r gnubg_config/* /root/.gnubg/ 2>/dev/null || true
+    cp -r /root/.gnubg/ 2>/dev/null || true
 
 # Make sure gnubg can find its data files
 RUN gnubg --version || true
 
 # Set the default command to run your script through gnubg (like Windows)
-CMD ["gnubg", "-t", "-p", "your_script.py"]
+CMD ["gnubg", "-t", "-p", "llm_version.py"]
