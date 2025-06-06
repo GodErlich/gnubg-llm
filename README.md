@@ -1,4 +1,7 @@
-this code uses gnubg module to create "agents" that each agent can play differently against gnubg.
+this code/library uses gnubg module to create "agents" that each agent can play differently against gnubg.
+it will be used by other developers to research 
+different agents by themselves and let them play with each other
+this is just an infrastructure for research.
 
 we want the ability to initialize an agent.
 agent will get as input this:
@@ -14,3 +17,10 @@ the agent will decide what to do with the above input + additional text(prompt),
 1. use gnubg engine only ( it will ignore the prompt)
 2. use llm to decide
 3. let an llm write code to solve the problem at hand
+
+also an ability to create a game with different agents
+1. gnubg agent
+2. any custom agent
+
+also we could run the game loop few time by configuration in order to 
+get statistics on the ability of our agents.
