@@ -28,7 +28,7 @@ def get_board_representation():
     try:
         board = gnubg.board()
         # Format board for better LLM understanding
-        board_repr = {"player": [], "opponent": []}
+        board_repr = {"player": [], "player2": []}
 
         # Process board data
         # gnubg board format is typically:
@@ -39,7 +39,7 @@ def get_board_representation():
             if board[0][i] > 0:
                 board_repr["player"].append({"point": i + 1, "checkers": board[0][i]})
             if board[1][i] > 0:
-                board_repr["opponent"].append(
+                board_repr["player2"].append(
                     {"point": 24 - i, "checkers": board[1][i]}
                 )
 
@@ -47,7 +47,7 @@ def get_board_representation():
         if board[0][24] > 0:
             board_repr["player"].append({"point": "bar", "checkers": board[0][24]})
         if board[1][24] > 0:
-            board_repr["opponent"].append({"point": "bar", "checkers": board[1][24]})
+            board_repr["player2"].append({"point": "bar", "checkers": board[1][24]})
 
         return board_repr
     except Exception as e:
@@ -173,19 +173,6 @@ def get_moves_with_fallbacks():
             except Exception as e:
                 log_message(f"Error with findbestmove pattern 1: {e}")
 
-                # Try pattern 2: other variations of parameters
-                try:
-                    # This is a guess - try without parameters
-                    best_move = gnubg.findbestmove()
-                    if best_move:
-                        log_message(
-                            f"Found move with findbestmove (no params): {best_move}"
-                        )
-                        move_str = gnubg.movetupletostring(best_move)
-                        moves = [{"move": move_str, "equity": 0}]
-                        return moves
-                except Exception as e:
-                    log_message(f"Error with findbestmove pattern 2: {e}")
     except Exception as e:
         log_message(f"Error with findbestmove approach: {e}")
 
@@ -702,11 +689,11 @@ def play_full_game():
         log_message(traceback.format_exc())
 
 
-# Start the game
-try:
-    play_full_game()
-except Exception as e:
-    log_message(f"Error in main: {e}")
-    import traceback
+if __name__ == "__main__":
+    try:
+        play_full_game()
+    except Exception as e:
+        log_message(f"Error in main: {e}")
+        import traceback
 
-    log_message(traceback.format_exc())
+        log_message(traceback.format_exc())
