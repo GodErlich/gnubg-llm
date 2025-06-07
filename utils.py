@@ -3,11 +3,10 @@ import time
 import os
 import json
 from typing import List, Tuple
+import re
 
 import requests
-import json
 import dotenv
-
 dotenv.load_dotenv()
 
 # LLM API configuration
@@ -161,16 +160,23 @@ def default_board_representation(board: Tuple[int, int] = None) -> str:
             {chr(10).join(board_state)}
             {on_bar}"""
 
-def move_piece(move: str):
-    """Move a piece according to the move string."""
-    # check if move is valid
+def is_valid_move(move: str) -> bool:
+    """Check if a move is valid."""
     if not move or not isinstance(move, str):
         log_message("Invalid move format. Move must be a non-empty string.")
         return False
-    # Check if the move is in the correct format
-    if not move.isdigit() or len(move) < 2:
-        log_message("Invalid move format. Move must be a string of digits.")
+    # check if move is in the correct format: examples: 13/6**, 13/11 8/3, 24/22 8/3, 13/7*/5
+    valid_move_pattern = r"^\d{1,2}/\d{1,2}(\s\d{1,2}/\d{1,2})*(\s\*\*)?$"
+    if not re.match(valid_move_pattern, move):
+        log_message(f"Invalid move format: {move}")
         return False
+    
+def move_piece(move: str):
+    """Move a piece according to the move string."""
+    # TODO: fix is valid move and then uncomment this
+    # if not is_valid_move(move):
+    #     log_message("Invalid move format. Move must be a non-empty string.")
+    #     return False
     try:
         gnubg.command(f"move {move}")
     except Exception as e:
@@ -212,7 +218,7 @@ def default_move():
     """ makes gnubg play the best move according to him."""
     all_moves =  get_possible_moves()
     # take random move
-    return all_moves[0]
+    return all_moves[0]['move']
 
 def get_game_context():
     """Get the current game context including position evaluation"""
@@ -442,4 +448,11 @@ def call_openai_api(prompt):
 
     except Exception as e:
         log_message(f"Error calling API: {e}")
+        return None
+
+def roll_dice():
+    """Roll the dice using gnubg."""
+    try:
+        gnubg.command("roll")
+    except Exception as e:
         return None
