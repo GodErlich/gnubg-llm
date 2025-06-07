@@ -20,11 +20,11 @@ class GnuBGAgent(Agent):
     def __init__(self, board_representation=None):
             super().__init__(board_representation)
 
-    def choose_move(self):
+    def choose_move(self, board=None, possible_moves=None):
         """Use gnubg to select a move."""
         move = default_move()
-        move_piece(move)    
-    
+        return move
+
 class LLMAgent(Agent):
     """Agent that uses an LLM to select moves (uses prompt if provided)."""
     def __init__(self, board_representation=None, prompt=None):
@@ -37,8 +37,7 @@ class LLMAgent(Agent):
             if not possible_moves:
                 log_message("No moves could be found with any method")
                 move = default_move()
-                move_piece(move)
-                return True
+                return move
 
             board_repr = self.board_representation(board)
 
@@ -47,21 +46,15 @@ class LLMAgent(Agent):
             if chosen_move_data:
                 chosen_move = chosen_move_data["move"]
                 log_message(f"Playing LLM-recommended move: {chosen_move}")
-                move_piece(chosen_move)
+                return chosen_move
 
             else:
                 log_message("No moves available")
-                move = default_move()
-                move_piece(move)
-
-                return False
-            
-
-            return True
+                return None
 
         except Exception as e:
             log_message(f"Error in play_llm_move: {e}")
             import traceback
 
             log_message(traceback.format_exc())
-            return False
+            return None
