@@ -28,3 +28,12 @@ get statistics on the ability of our agents.
 How to run?
 prequisites:
 docker desktop(installed and opened)
+python3
+
+open a terminal of the root folder of the project.
+windows:
+run build_and_run.bat
+script starts running!
+
+to change the code, just create your own file, you can check example.py for reference.
+use game class to create a game, add agents, and when  you done change the import in main.py file to your file instead.
