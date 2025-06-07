@@ -1,7 +1,7 @@
 import gnubg
 import time
 from agents import Agent
-from utils import get_simple_board, get_possible_moves, get_player_name, default_move, move_piece
+from utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice
 
 class Game:
     """Manages a backgammon game between two agents."""
@@ -39,24 +39,21 @@ class Game:
             posinfo = gnubg.posinfo()
             board = get_simple_board()
             turn = posinfo["turn"]
-            gnubg.command("roll")
+            roll_dice()
             possible_moves = get_possible_moves()
             board = get_simple_board()
             if turn == 0:
                 move = self.agent1.choose_move(board, possible_moves)
-                print(get_player_name())
             else:
                 move = self.agent2.choose_move(board, possible_moves)
-            if move and "move" in move:
-                gnubg.command(f"move {move['move']}")
+            if move:
+                move_piece(move)
             else:
                 print(f"Agent {turn} did not choose a valid move. gnubg will play automatically.")
                 move = default_move()
                 move_piece(move)
 
-            print(f"board by agent1: { self.agent1.board_representation(board) }")
-            print(f"board by agent2: { self.agent2.board_representation(board) }")
-            time.sleep(30)
+            time.sleep(1)
 
         # Return winner info
         match_info = gnubg.match()
