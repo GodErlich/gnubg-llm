@@ -24,3 +24,7 @@ also an ability to create a game with different agents
 
 also we could run the game loop few time by configuration in order to 
 get statistics on the ability of our agents.
+
+How to run?
+prequisites:
+docker desktop(installed and opened)
