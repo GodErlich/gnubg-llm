@@ -67,8 +67,14 @@ RUN pip3 install PyGreSQL PyMySQL || echo "Database libraries failed - continuin
 RUN pip3 install --no-cache-dir -r requirements.txt || echo "Some packages failed - continuing"
 
 # Copy your Python script and configuration files
-COPY main.py .
 COPY .env .
+## TODO: instead of copying all files one by one, move all to a specific directory, named src.
+COPY main.py .
+COPY example.py .
+COPY agents.py .
+COPY utils.py .
+COPY game.py .
+
 
 # Set environment variables for gnubg
 ENV GNUBG_DIR=/usr/local/share/gnubg
