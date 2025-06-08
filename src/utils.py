@@ -3,9 +3,13 @@ import time
 import os
 from typing import List, Tuple
 import re
+import random
 
 import requests
 import dotenv
+
+from .types import Hint
+
 dotenv.load_dotenv()
 
 # LLM API configuration
@@ -187,34 +191,46 @@ def move_piece(move: str):
     return True
    
 
-def get_possible_moves() -> List:
+def get_possible_moves() -> List[str]:
     try:
         hints = gnubg.hint()
-        return hints.get("hint", [])
+        hint_moves = hints.get("hint", [])
+        if hint_moves:
+            moves = [ m["move"] for m in hint_moves]
+            # reorder moves to randomize the order
+            random.shuffle(moves)
+            return moves
+        else:
+            return []
     except Exception:
         return []
         
-def get_hints():
+def get_hints() -> List[Hint]:
     try:
         hints = gnubg.hint()
-        return hints.get("hints", [])
+        hint_moves = hints.get("hint", [])
+        if hint_moves:
+            moves = [
+                {"move": m["move"], "equity": m.get("equity", 0)} for m in hint_moves
+            ]
+            return moves
+        else:
+            return []
     except Exception:
         return []
     
-def get_best_move():
+def get_best_move() -> str:
     try:
-        dice = get_dice()
+        hints = gnubg.hint()
+        hint_moves = hints.get("hint", [])
+        if hint_moves:
+            best_move = max(hint_moves, key=lambda x: x.get("equity", 0))
+            move = best_move["move"]            
+            return move
 
-        board = get_simple_board()
-        best_move = gnubg.findbestmove(dice, board)
-        if best_move:
-            log_message(f"Found move with findbestmove: {best_move}")
-            # Convert to our standard format
-            move_str = gnubg.movetupletostring(best_move)
-            moves = [{"move": move_str, "equity": 0}]
-            return moves
     except Exception as e:
         log_message(f"Error with findbestmove pattern 1: {e}")
+        return None
 
 def default_move():
     """ makes gnubg play the best move according to him."""
