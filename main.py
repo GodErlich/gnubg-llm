@@ -1,5 +1,16 @@
 import sys
 import os
+import signal
+import sys
+
+# allows graceful shutdown on SIGINT (Ctrl+C) or SIGTERM
+def signal_handler(sig, frame):
+    print('\nReceived interrupt signal, exiting gracefully...')
+    sys.exit(0)
+
+# Add this at the start of your main.py
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 current_dir = os.getcwd()
 
