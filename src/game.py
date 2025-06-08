@@ -1,7 +1,7 @@
 import gnubg
 import time
 from .agents import Agent
-from .utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice
+from .utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice, get_hints, get_best_move
 
 class Game:
     """Manages a backgammon game between two agents."""
@@ -41,6 +41,8 @@ class Game:
             turn = posinfo["turn"]
             roll_dice()
             possible_moves = get_possible_moves()
+            hints = get_hints()
+            best_move = get_best_move()
             board = get_simple_board()
             if turn == 0:
                 move = self.agent1.choose_move(board, possible_moves)
