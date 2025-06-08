@@ -1,7 +1,7 @@
 import gnubg
 import time
-from agents import Agent
-from utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice
+from .agents import Agent
+from .utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice
 
 class Game:
     """Manages a backgammon game between two agents."""
@@ -11,7 +11,7 @@ class Game:
         self.max_turns = max_turns
         self.turn_count = 0
 
-    def is_game_over(self):
+    def __is_game_over(self):
         board = get_simple_board()
         player1_checkers = sum(board[0])
         player2_checkers = sum(board[1])
@@ -25,16 +25,16 @@ class Game:
                     return True
         return False
     
-    def init_game(self):
+    def __init_game(self):
         gnubg.command("new game")
         gnubg.command("set player 0 human")
         gnubg.command("set player 1 human")
 
 
     def play(self):
-        self.init_game()
+        self.__init_game()
         self.turn_count = 0
-        while self.turn_count < self.max_turns and not self.is_game_over():
+        while self.turn_count < self.max_turns and not self.__is_game_over():
             self.turn_count += 1
             posinfo = gnubg.posinfo()
             board = get_simple_board()

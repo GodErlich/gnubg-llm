@@ -68,13 +68,10 @@ RUN pip3 install --no-cache-dir -r requirements.txt || echo "Some packages faile
 
 # Copy your Python script and configuration files
 COPY .env .
-## TODO: instead of copying all files one by one, move all to a specific directory, named src.
 COPY main.py .
-COPY example.py .
-COPY agents.py .
-COPY utils.py .
-COPY game.py .
 
+## TODO: instead of copying all files one by one, move all to a specific directory, named src.
+COPY src/ /app/src/
 
 # Set environment variables for gnubg
 ENV GNUBG_DIR=/usr/local/share/gnubg

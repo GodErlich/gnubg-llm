@@ -13,7 +13,7 @@ if '/app' not in sys.path:
 
 
 try:
-    from example import main # change imoprt here to your own main function.
+    from src.example import main # change this to your own module. make sure the file is in the src directory.
 except ImportError as e:
     print(f"Import error: {e}")
     # List all Python files for debugging

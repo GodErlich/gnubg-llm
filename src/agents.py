@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from utils import default_board_representation, log_message, default_move, move_piece, consult_llm
+from .utils import default_board_representation, log_message, default_move, move_piece, consult_llm
 
 class Agent(ABC):
     """Abstract class for all agents."""

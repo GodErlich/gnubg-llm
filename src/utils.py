@@ -1,7 +1,6 @@
 import gnubg
 import time
 import os
-import json
 from typing import List, Tuple
 import re
 
@@ -218,6 +217,10 @@ def default_move():
     """ makes gnubg play the best move according to him."""
     all_moves =  get_possible_moves()
     # take random move
+    if not all_moves:
+        log_message("No possible moves found, using default move.")
+        gnubg.command("play")
+        return None
     return all_moves[0]['move']
 
 def get_game_context():
