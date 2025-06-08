@@ -172,6 +172,9 @@ def is_valid_move(move: str) -> bool:
     
 def move_piece(move: str):
     """Move a piece according to the move string."""
+    if not move:
+        gnubg.command("play")
+        return False
     # TODO: fix is valid move and then uncomment this
     # if not is_valid_move(move):
     #     log_message("Invalid move format. Move must be a non-empty string.")
@@ -217,9 +220,8 @@ def default_move():
     """ makes gnubg play the best move according to him."""
     all_moves =  get_possible_moves()
     # take random move
-    if not all_moves:
-        log_message("No possible moves found, using default move.")
-        gnubg.command("play")
+    if not all_moves or len(all_moves) == 0:
+        log_message("No possible moves found")
         return None
     return all_moves[0]['move']
 
