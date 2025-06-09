@@ -17,9 +17,9 @@ LLM_API_URL = os.getenv("LLM_API_URL")
 LLM_API_KEY = os.getenv("LLM_API_KEY")
 
 
+output_dir = "/app/output" if os.path.exists("/app/output") else os.getcwd()
 log_file_name = f"game_log_{time.strftime('%Y%m%d_%H%M%S')}.txt"
-LOG_FILE = os.path.join(os.getcwd(), log_file_name)
-
+LOG_FILE = os.path.join(output_dir, log_file_name)
 
 
 def log_message(message):
@@ -240,7 +240,8 @@ def default_move():
     if not all_moves or len(all_moves) == 0:
         log_message("No possible moves found")
         return None
-    return all_moves[0]['move']
+    
+    return all_moves[0]
 
 def get_game_context():
     """Get the current game context including position evaluation"""
