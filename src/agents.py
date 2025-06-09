@@ -75,3 +75,21 @@ class LLMAgent(Agent):
 
             log_message(traceback.format_exc())
             return None
+
+class RandomAgent(Agent):
+    """Agent that uses gnubg to select moves"""
+
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
+            inputs["possible_moves"] = True # Random agent needs possible moves
+            super().__init__(board_representation, inputs)
+
+    def choose_move(self, board, extra_input: AgentInput = None):
+        """ choose a random move from the possible moves """
+        possible_moves = extra_input.get("possible_moves", [])
+        if not possible_moves:
+            log_message("No moves could be found with any method")
+            move = default_move()
+            return move
+
+        move = possible_moves[0] # possible moves is a list of random moves
+        return move
