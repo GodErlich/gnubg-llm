@@ -44,10 +44,10 @@ class Game:
             best_move = get_best_move()
             board = get_simple_board()
             if turn == 0:
-                extra_input = self.agent1.pass_inputs(possible_moves, hints, best_move)
+                extra_input = self.agent1.filter_inputs(possible_moves, hints, best_move)
                 move = self.agent1.choose_move(board, extra_input)
             else:
-                extra_input = self.agent2.pass_inputs(possible_moves, hints, best_move)
+                extra_input = self.agent2.filter_inputs(possible_moves, hints, best_move)
                 move = self.agent2.choose_move(board, extra_input)
             if move:
                 move_piece(move)

@@ -17,7 +17,8 @@ class Agent(ABC):
     def choose_move(self, board, possible_moves=None, hints=None, prompt=None):
         pass
 
-    def pass_inputs(self, possible_moves, hints, best_move):
+    def filter_inputs(self, possible_moves, hints, best_move):
+        """Filter inputs based on the agent's configuration. do not use this method"""
         inputs = {"possible_moves": None, "hints": None, "best_move": None}
         if self.inputs is None:
             return inputs
@@ -50,13 +51,8 @@ class LLMAgent(Agent):
 
     def choose_move(self, board, extra_input: AgentInput = None):
         try:
-            possible_moves = extra_input.get("possible_moves")
-            if not possible_moves:
-                log_message("No moves could be found with any method")
-                move = default_move()
-                return move
-
             board_repr = self.board_representation(board)
+            possible_moves = extra_input.get("possible_moves", [])
 
             chosen_move_data = consult_llm(board_repr, possible_moves)
 
@@ -93,3 +89,15 @@ class RandomAgent(Agent):
 
         move = possible_moves[0] # possible moves is a list of random moves
         return move
+
+
+class LiveCodeAgent(Agent):
+    """Agent that uses llm to write code, then executes it to select a move."""
+
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = None, prompt=None):
+        self.defaultPrompt = prompt
+        super().__init__(board_representation, inputs)
+
+    def choose_move(self, board, extra_input: AgentInput = None):
+        """Use live code to select a move."""
+        
