@@ -186,7 +186,8 @@ def move_piece(move: str):
     try:
         gnubg.command(f"move {move}")
     except Exception as e:
-        log_message(f"Error moving piece: {e}")
+        log_message(f"Error moving piece, forcing gnubg to play: {e}")
+        gnubg.command("play")
         return False
     return True
    
