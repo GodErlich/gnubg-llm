@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import time
 from .interfaces import AgentInputConfig, AgentInput
 from .utils import default_board_representation, log_message, default_move, consult_llm
 
@@ -36,7 +37,7 @@ class GnuBGAgent(Agent):
     """Agent that uses gnubg to select moves"""
 
     def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
-            super().__init__(board_representation, inputs)
+        super().__init__(board_representation, inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
         """Use gnubg to select a move."""
@@ -72,6 +73,26 @@ class LLMAgent(Agent):
             log_message(traceback.format_exc())
             return None
 
+
+class DebugAgent(Agent):
+    """Agent for debugging purposes, does not select moves but logs information."""
+
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
+        super().__init__(board_representation, inputs)
+
+    def choose_move(self, board, extra_input: AgentInput = None):
+        """ choose a random move from the possible moves """
+        possible_moves = extra_input.get("possible_moves", [])
+        hints = extra_input.get("hints", [])
+        best_move = extra_input.get("best_move", None)
+        log_message(f"DebugAgent: Board Representation: {self.board_representation(board)}")
+        log_message(f"DebugAgent: Possible Moves: {possible_moves}")
+        log_message(f"DebugAgent: Hints: {hints}")
+        log_message(f"DebugAgent: Best Move: {best_move}")
+        time.sleep(10)  # Simulate processing time
+        move = default_move()
+        return move
+
 class RandomAgent(Agent):
     """Agent that uses gnubg to select moves"""
 
@@ -100,4 +121,27 @@ class LiveCodeAgent(Agent):
 
     def choose_move(self, board, extra_input: AgentInput = None):
         """Use live code to select a move."""
+        try:
+            board_repr = self.board_representation(board)
+            possible_moves = extra_input.get("possible_moves", [])
+            hints = extra_input.get("hints", [])
+            best_move = extra_input.get("best_move", None)
+
+            chosen_move_data = consult_llm(board_repr, possible_moves, )
+
+            if chosen_move_data:
+                chosen_move = chosen_move_data["move"]
+                log_message(f"Playing LiveCode-recommended move: {chosen_move}")
+                return chosen_move
+
+            else:
+                log_message("No moves available")
+                return None
+
+        except Exception as e:
+            log_message(f"Error in play_live_code_move: {e}")
+            import traceback
+
+            log_message(traceback.format_exc())
+            return None
         
