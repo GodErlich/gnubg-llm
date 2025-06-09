@@ -8,7 +8,7 @@ import random
 import requests
 import dotenv
 
-from .types import Hint
+from .interfaces import Hint
 
 dotenv.load_dotenv()
 
