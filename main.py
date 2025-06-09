@@ -22,7 +22,6 @@ if current_dir not in sys.path:
 if '/app' not in sys.path:
     sys.path.insert(0, '/app')
 
-
 try:
     from src.example import main # change this to your own module. make sure the file is in the src directory.
 except ImportError as e:
