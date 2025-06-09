@@ -85,7 +85,7 @@ class DebugAgent(Agent):
         possible_moves = extra_input.get("possible_moves", [])
         hints = extra_input.get("hints", [])
         best_move = extra_input.get("best_move", None)
-        log_message(f"DebugAgent: Board Representation: {self.board_representation(board)}")
+        log_message(f"DebugAgent: {self.board_representation(board)}")
         log_message(f"DebugAgent: Possible Moves: {possible_moves}")
         log_message(f"DebugAgent: Hints: {hints}")
         log_message(f"DebugAgent: Best Move: {best_move}")
