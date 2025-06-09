@@ -6,7 +6,7 @@ from .utils import default_board_representation, log_message, default_move, cons
 class Agent(ABC):
     """Abstract class for all agents."""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}):
         if board_representation is None:
             board_representation = default_board_representation
         self.board_representation = board_representation
@@ -36,7 +36,7 @@ class Agent(ABC):
 class GnuBGAgent(Agent):
     """Agent that uses gnubg to select moves"""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}):
         super().__init__(board_representation, inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
@@ -46,7 +46,7 @@ class GnuBGAgent(Agent):
 
 class LLMAgent(Agent):
     """Agent that uses an LLM to select moves (uses prompt if provided)."""
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = None,prompt=None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {},prompt=None):
         self.defaultPrompt = prompt
         super().__init__(board_representation, inputs)
 
@@ -77,7 +77,7 @@ class LLMAgent(Agent):
 class DebugAgent(Agent):
     """Agent for debugging purposes, does not select moves but logs information."""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}):
         super().__init__(board_representation, inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
@@ -96,7 +96,7 @@ class DebugAgent(Agent):
 class RandomAgent(Agent):
     """Agent that uses gnubg to select moves"""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}):
             inputs["possible_moves"] = True # Random agent needs possible moves
             super().__init__(board_representation, inputs)
 
@@ -115,7 +115,7 @@ class RandomAgent(Agent):
 class LiveCodeAgent(Agent):
     """Agent that uses llm to write code, then executes it to select a move."""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = None, prompt=None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}, prompt=None):
         self.defaultPrompt = prompt
         super().__init__(board_representation, inputs)
 
