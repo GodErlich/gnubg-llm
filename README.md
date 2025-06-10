@@ -25,15 +25,31 @@ also an ability to create a game with different agents
 also we could run the game loop few time by configuration in order to 
 get statistics on the ability of our agents.
 
+Prequisites:
+Windows:
+docker desktop
+
+Linux:
+TODO: add this
+
 How to run?
-prequisites:
-docker desktop(installed and opened)
-python3
 
+Windows:
+make sure docker desktop runs in background.
 open a terminal of the root folder of the project.
-windows:
-run build_and_run.bat
-script starts running!
+in the terminal write: "build_and_run.bat"
+The game loop should start running, you will see the output in the terminal.
 
-to change the code, just create your own file, you can check example.py for reference.
-use game class to create a game, add agents, and when  you done change the import in main.py file to your file instead.
+Linux:
+TODO: add this
+
+
+To change the code that runs, create a yourfile.py file in the src folder with a main function, you can check example.py for reference.
+use game class to create a game, add agents and their configurations.
+When you are done, change the import in the main.py file to your file.
+In line 26 in main.py file: "from src.example import main" change to "from src.yourfile import main"
+
+You can also change directly the code in example.py file.
+
+If you want to add a new agent with different behavior, add it in the agents.py file,
+like the other agents over there.
