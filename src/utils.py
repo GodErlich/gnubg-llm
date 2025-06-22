@@ -406,14 +406,18 @@ def extract_move_from_llm_response(response, possible_moves):
         log_message(f"Error extracting move from response: {e}")
         return None
 
-def consult_llm(board_repr, possible_moves, prompt=None):
+def consult_llm(board_repr, possible_moves, prompt=None, system_prompt=None):
     """Send game state to LLM and get move recommendation"""
     try:
+        # TODO: check how to pass parameters to the prompt
+        # TODO: make sure prompt has board_repr. otherwise use default prompt.
         if not prompt:
             prompt = default_prompt(board_repr)
 
-        llm_response = call_openai_api(prompt)
+        llm_response = call_openai_api(prompt, system_prompt=system_prompt)
 
+        # TODO: make sure extract move from llm transform the reposnse to a move that gnubg can understand.
+        # if not pass it to openai api again, with instructions to return a move that gnubg can understand.
         move_choice = extract_move_from_llm_response(llm_response, possible_moves)
 
         if move_choice:
@@ -430,8 +434,10 @@ def consult_llm(board_repr, possible_moves, prompt=None):
         return default_move()
 
 
-def call_openai_api(prompt):
+def call_openai_api(prompt, system_prompt=None):
     """Call the OpenAI API"""
+    if not system_prompt:
+        system_prompt = "You are an expert backgammon assistant."
     try:
         base_url = os.getenv("LLM_API_URL")
         deployment = "gpt-4o"
@@ -448,11 +454,10 @@ def call_openai_api(prompt):
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are an expert backgammon assistant.",
+                    "content": system_prompt,
                 },
                 {"role": "user", "content": prompt},
             ],
-            "temperature": 0.1,
             "max_tokens": 8000,
         }
 
