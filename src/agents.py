@@ -46,8 +46,9 @@ class GnuBGAgent(Agent):
 
 class LLMAgent(Agent):
     """Agent that uses an LLM to select moves (uses prompt if provided)."""
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = {},prompt=None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {},prompt=None, system_prompt=None):
         self.defaultPrompt = prompt
+        self.system_prompt = system_prompt
         super().__init__(board_representation, inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
@@ -55,7 +56,7 @@ class LLMAgent(Agent):
             board_repr = self.board_representation(board)
             possible_moves = extra_input.get("possible_moves", [])
 
-            chosen_move_data = consult_llm(board_repr, possible_moves)
+            chosen_move_data = consult_llm(board_repr, possible_moves, prompt=self.defaultPrompt, system_prompt=self.system_prompt)
 
             if chosen_move_data:
                 chosen_move = chosen_move_data["move"]
@@ -115,8 +116,9 @@ class RandomAgent(Agent):
 class LiveCodeAgent(Agent):
     """Agent that uses llm to write code, then executes it to select a move."""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}, prompt=None):
+    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}, prompt=None, system_prompt=None):
         self.defaultPrompt = prompt
+        self.system_prompt = system_prompt
         super().__init__(board_representation, inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
@@ -127,7 +129,7 @@ class LiveCodeAgent(Agent):
             hints = extra_input.get("hints", [])
             best_move = extra_input.get("best_move", None)
 
-            chosen_move_data = consult_llm(board_repr, possible_moves, )
+            chosen_move_data = consult_llm(board_repr, possible_moves, prompt=self.defaultPrompt, system_prompt=self.system_prompt, use_live_code=True)
 
             if chosen_move_data:
                 chosen_move = chosen_move_data["move"]
