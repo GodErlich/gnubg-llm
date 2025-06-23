@@ -1,7 +1,7 @@
 import gnubg
 import time
 import os
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import re
 import random
 
@@ -345,6 +345,9 @@ def default_prompt(board_repr=None):
 
 def extract_move_from_llm_response(response, possible_moves):
     """Extract the recommended move from the LLM response"""
+    # TODO: make sure extract move from llm transform the reposnse to a move that gnubg can understand.
+    # if not pass it to openai api again, with instructions to return a move that gnubg can understand.
+
     try:
         if not response or "choices" not in response:
             return None
@@ -406,18 +409,31 @@ def extract_move_from_llm_response(response, possible_moves):
         log_message(f"Error extracting move from response: {e}")
         return None
 
-def consult_llm(board_repr, possible_moves, prompt=None, system_prompt=None):
-    """Send game state to LLM and get move recommendation"""
+# TODO: this function will get the same params as define in the agent config.
+def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
+                possible_moves: Optional[List[str]] = None, hints: Optional[List[Hint]] = None,
+                best_move: Optional[str] = None, **prompt_params):
+    """Send game state to LLM and get move recommendation
+        **prompt_params: Additional parameters to inject into the prompt
+    """
     try:
-        # TODO: check how to pass parameters to the prompt
-        # TODO: make sure prompt has board_repr. otherwise use default prompt.
         if not prompt:
             prompt = default_prompt(board_repr)
 
+        prompt_params = {
+            "board_repr": board_repr,
+            "possible_moves": possible_moves if possible_moves else [],
+            "hints": hints if hints else [],
+            "best_move": best_move if best_move else None,
+            **prompt_params
+        }
+        print(f"Prompt prompt: {prompt}")
+        prompt = prompt.format(**prompt_params)
+        print(f"Prompt prompt: {prompt}")
+        time.sleep(20) # TODO: remove this sleep, it is only for debugging purposes.
+        
         llm_response = call_openai_api(prompt, system_prompt=system_prompt)
 
-        # TODO: make sure extract move from llm transform the reposnse to a move that gnubg can understand.
-        # if not pass it to openai api again, with instructions to return a move that gnubg can understand.
         move_choice = extract_move_from_llm_response(llm_response, possible_moves)
 
         if move_choice:
