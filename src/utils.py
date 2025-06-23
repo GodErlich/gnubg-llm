@@ -426,12 +426,15 @@ def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
             "best_move": best_move if best_move else None,
             **prompt_params
         }
+         # TODO: remove this logs after debugging
         print(f"Prompt prompt: {prompt}")
         prompt = prompt.format(**prompt_params)
         print(f"Prompt prompt: {prompt}")
         time.sleep(20) # TODO: remove this sleep, it is only for debugging purposes.
         
         llm_response = call_openai_api(prompt, system_prompt=system_prompt)
+
+        # TODO: validate the response using schema
 
         move_choice = extract_move_from_llm_response(llm_response, possible_moves)
 
