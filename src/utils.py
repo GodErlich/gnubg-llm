@@ -409,7 +409,6 @@ def extract_move_from_llm_response(response, possible_moves):
         log_message(f"Error extracting move from response: {e}")
         return None
 
-# TODO: this function will get the same params as define in the agent config.
 def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
                 possible_moves: Optional[List[str]] = None, hints: Optional[List[Hint]] = None,
                 best_move: Optional[str] = None, **prompt_params):
