@@ -63,7 +63,6 @@ RUN pip3 install --upgrade pip
 # Install other packages (no need for PyPI gnubg - using embedded Python)
 RUN pip3 install python-dotenv requests || true
 RUN pip3 install ipython colorama || true
-RUN pip3 install PyGreSQL PyMySQL || echo "Database libraries failed - continuing without them"
 RUN pip3 install --no-cache-dir -r requirements.txt || echo "Some packages failed - continuing"
 
 # Copy your Python script and configuration files
