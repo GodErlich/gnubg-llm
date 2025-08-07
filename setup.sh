@@ -25,7 +25,7 @@ sudo make install
 sudo ldconfig
 
 # Setup Python environment
-cd ~/gnubg-workspace
+cd ~/gnubg-llm
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
