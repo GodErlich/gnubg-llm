@@ -1,0 +1,4 @@
+{
+    "python.defaultInterpreterPath": "~/gnubg-workspace/venv/bin/python",
+    "terminal.integrated.cwd": "${workspaceFolder}"
+}
