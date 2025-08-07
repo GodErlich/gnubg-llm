@@ -24,16 +24,17 @@ make -j$(nproc)
 sudo make install
 sudo ldconfig
 
-# Setup Python environment
 cd ~/gnubg-llm
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+pip3 install --user -r requirements.txt # Install Python dependencies globally because gnubg has embedded Python.
+
 
 # Test installation
 echo "🧪 Testing..."
 gnubg --version > /dev/null
-echo 'print("✅ Setup complete!")' | gnubg -t -p /dev/stdin
 
-echo ""
-echo "🎉 Setup complete!"
+if [ $? -ne 0 ]; then
+    echo "❌ GNU Backgammon installation failed!"
+    exit 1
+else
+    echo "✅ GNU Backgammon installed successfully! 🎉"
+fi
