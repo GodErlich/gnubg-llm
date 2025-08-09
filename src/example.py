@@ -10,4 +10,4 @@ def main():
     game = Game(agent0, agent1)
 
     # Play the game
-    game.play()
+    return game.play()
