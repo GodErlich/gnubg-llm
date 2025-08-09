@@ -433,7 +433,6 @@ def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
         print(f"Prompt prompt: {prompt}")
         prompt = prompt.format(**prompt_params)
         print(f"Prompt prompt: {prompt}")
-        time.sleep(20) # TODO: remove this sleep, it is only for debugging purposes.
         
         llm_response = call_openai_api(prompt, system_prompt=system_prompt)
 
