@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import time
 from .interfaces import AgentInputConfig, AgentInput
 from .utils import default_board_representation, log_message, default_move, consult_llm
 
@@ -32,7 +31,7 @@ class Agent(ABC):
         
         return inputs
 
-# costum agents
+# custom agents
 class GnuBGAgent(Agent):
     """Agent that uses gnubg to select moves"""
 
@@ -90,7 +89,6 @@ class DebugAgent(Agent):
         log_message(f"DebugAgent: Possible Moves: {possible_moves}")
         log_message(f"DebugAgent: Hints: {hints}")
         log_message(f"DebugAgent: Best Move: {best_move}")
-        time.sleep(10)  # wait for few seconds to allow reading the logs in console.
         move = default_move()
         return move
 
