@@ -1,35 +1,40 @@
-import sys
+#!/usr/bin/env python3
+import subprocess
 import os
-import signal
-import sys
 
-# allows graceful shutdown on SIGINT (Ctrl+C) or SIGTERM
-def signal_handler(sig, frame):
-    print('\nReceived interrupt signal, exiting gracefully...')
-    sys.exit(0)
+def run_silent_game():
+    """Run a single game silently and return winner"""
+    # Redirect gnubg output to /dev/null
+    with open(os.devnull, 'w') as devnull:
+        result = subprocess.run([
+            "gnubg", "-t", "-p", "app.py"
+        ], stdout=devnull, stderr=devnull, capture_output=False)
+    
+    # You'll need to modify main.py to output just the winner
+    # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
+    return result.returncode
 
-# Add this at the start of your main.py
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
-
-current_dir = os.getcwd()
-
-# Add current directory to Python path
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
-# Also try /app directory explicitly
-if '/app' not in sys.path:
-    sys.path.insert(0, '/app')
-
-try:
-    from src.example import main # change this to your own module. make sure the file is in the src directory.
-except ImportError as e:
-    print(f"Import error: {e}")
-    # List all Python files for debugging
-    py_files = [f for f in os.listdir('.') if f.endswith('.py')]
-    print(f"Python files in directory: {py_files}")
-    raise
+def run_batch_games(num_games=2):
+    """Run multiple games and show summary"""
+    print(f"Running {num_games} games...")
+    
+    player_0_wins = 0
+    player_1_wins = 0
+    
+    for i in range(num_games):
+        if (i + 1) % 10 == 0:
+            print(f"Progress: {i + 1}/{num_games}")
+        
+        winner = run_silent_game()
+        print(winner)
+        if winner == 0:
+            player_0_wins += 1
+        else:
+            player_1_wins += 1
+    
+    print(f"\n=== RESULTS ===")
+    print(f"Player 0 won: {player_0_wins} times ({player_0_wins/num_games*100:.1f}%)")
+    print(f"Player 1 won: {player_1_wins} times ({player_1_wins/num_games*100:.1f}%)")
 
 if __name__ == "__main__":
-    main()
+    run_batch_games()
