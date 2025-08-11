@@ -1,7 +1,9 @@
 import gnubg
 import time
+
 from .agents import Agent
-from .utils import get_simple_board, get_possible_moves, default_move, log_message, move_piece, roll_dice, get_hints, get_best_move
+from .utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice, get_hints, get_best_move
+from .logger import logger
 
 class Game:
     """Manages a backgammon game between two agents."""
@@ -60,8 +62,8 @@ class Game:
 
         # Return winner info
         match_info = gnubg.match()
-        log_message(f"Game ended after {self.turn_count} turns.")
-        log_message(f"Match info: {match_info}")
+        logger.info(f"Game ended after {self.turn_count} turns.")
+        logger.debug(f"Match info: {match_info}")
 
 
         if "games" in match_info and match_info["games"]:
@@ -69,5 +71,5 @@ class Game:
             if "info" in latest_game and "winner" in latest_game["info"]:
                 return latest_game["info"]["winner"]
 
-        log_message("No winner found in match info.")
-        return None 
+        logger.warning("No winner found in match info.")
+        return None

@@ -1,5 +1,4 @@
 import gnubg
-import time
 import os
 from typing import List, Optional, Tuple
 import re
@@ -9,29 +8,12 @@ import requests
 import dotenv
 
 from .interfaces import Hint
-
+from .logger import logger
 dotenv.load_dotenv()
 
 # LLM API configuration
 LLM_API_URL = os.getenv("LLM_API_URL")
 LLM_API_KEY = os.getenv("LLM_API_KEY")
-
-output_dir = "output"
-
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-log_file_name = f"game_log_{time.strftime('%Y%m%d_%H%M%S')}.txt"
-LOG_FILE = os.path.join(output_dir, log_file_name)
-
-
-def log_message(message):
-    """Write a message to the log file"""
-    with open(LOG_FILE, "a") as f:
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"[{timestamp}] {message}\n")
-    print(message)
-
 
 def get_game_context():
     """Get the current game context including position evaluation"""
@@ -71,7 +53,7 @@ def get_game_context():
 
         return context
     except Exception as e:
-        log_message(f"Error getting game context: {e}")
+        logger.error(f"Error getting game context: {e}")
         return {}
 
 def get_player_name() -> str:
@@ -85,7 +67,7 @@ def get_dice() -> tuple:
     posinfo = gnubg.posinfo()
     dice = posinfo["dice"]
     if dice is None or len(dice) < 2:
-        log_message("No dice rolled yet.")
+        logger.warning("No dice rolled yet.")
         return None
 
 def reverse_board(board: tuple) -> tuple:
@@ -165,12 +147,12 @@ def default_board_representation(board: Tuple[int, int] = None) -> str:
 def is_valid_move(move: str) -> bool:
     """Check if a move is valid."""
     if not move or not isinstance(move, str):
-        log_message("Invalid move format. Move must be a non-empty string.")
+        logger.warning("Invalid move format. Move must be a non-empty string.")
         return False
     # check if move is in the correct format: examples: 13/6**, 13/11 8/3, 24/22 8/3, 13/7*/5
     valid_move_pattern = r"^\d{1,2}/\d{1,2}(\s\d{1,2}/\d{1,2})*(\s\*\*)?$"
     if not re.match(valid_move_pattern, move):
-        log_message(f"Invalid move format: {move}")
+        logger.warning(f"Invalid move format: {move}")
         return False
     
 def move_piece(move: str):
@@ -180,12 +162,12 @@ def move_piece(move: str):
         return False
     # TODO: fix is valid move and then uncomment this
     # if not is_valid_move(move):
-    #     log_message("Invalid move format. Move must be a non-empty string.")
+    #     logger.warning("Invalid move format. Move must be a non-empty string.")
     #     return False
     try:
         gnubg.command(f"move {move}")
     except Exception as e:
-        log_message(f"Error moving piece, forcing gnubg to play: {e}")
+        logger.error(f"Error moving piece, forcing gnubg to play: {e}")
         gnubg.command("play")
         return False
     return True
@@ -229,7 +211,7 @@ def get_best_move() -> str:
             return move
 
     except Exception as e:
-        log_message(f"Error with findbestmove pattern 1: {e}")
+        logger.error(f"Error with findbestmove: {e}")
         return None
 
 def default_move():
@@ -237,7 +219,7 @@ def default_move():
     all_moves =  get_possible_moves()
     # take random move
     if not all_moves or len(all_moves) == 0:
-        log_message("No possible moves found")
+        logger.info("No possible moves found")
         return None
     
     return all_moves[0]
@@ -280,7 +262,7 @@ def get_game_context():
 
         return context
     except Exception as e:
-        log_message(f"Error getting game context: {e}")
+        logger.error(f"Error getting game context: {e}")
         return {}
 
 
@@ -356,7 +338,7 @@ def extract_move_from_llm_response(response, possible_moves):
             return None
 
         content = response["choices"][0]["message"]["content"]
-        log_message(f"LLM response: {content}")
+        logger.debug(f"LLM response: {content}")
 
         # Look for a section that might contain the recommended move
         # This is a simple extraction approach - can be refined based on actual responses
@@ -384,7 +366,7 @@ def extract_move_from_llm_response(response, possible_moves):
                         recommendation = recommendation.replace(char, "")
 
                     recommendation = recommendation.strip()
-                    log_message(f"Extracted move: '{recommendation}'")
+                    logger.debug(f"Extracted move: '{recommendation}'")
 
                     # Try to match with available moves
                     for move in possible_moves:
@@ -402,14 +384,14 @@ def extract_move_from_llm_response(response, possible_moves):
         # If we couldn't find a clear recommendation, try to find any move notation in the text
         for move in possible_moves:
             if move["move"] in content:
-                log_message(f"Found move match in content: {move['move']}")
+                logger.debug(f"Found move match in content: {move['move']}")
                 return move
 
         # No clear recommendation found
-        log_message("No clear move recommendation found in response")
+        logger.warning("No clear move recommendation found in response")
         return None
     except Exception as e:
-        log_message(f"Error extracting move from response: {e}")
+        logger.error(f"Error extracting move from response: {e}")
         return None
 
 def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
@@ -429,10 +411,8 @@ def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
             "best_move": best_move if best_move else None,
             **prompt_params
         }
-         # TODO: remove this logs after debugging
-        print(f"Prompt prompt: {prompt}")
+        
         prompt = prompt.format(**prompt_params)
-        print(f"Prompt prompt: {prompt}")
         
         llm_response = call_openai_api(prompt, system_prompt=system_prompt)
 
@@ -441,16 +421,16 @@ def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
         move_choice = extract_move_from_llm_response(llm_response, possible_moves)
 
         if move_choice:
-            log_message(f"LLM recommended move: {move_choice['move']}")
+            logger.debug(f"LLM recommended move: {move_choice['move']}")
             return move_choice
 
         return default_move()
     except Exception as e:
-        log_message(f"Error consulting LLM: {e}")
+        logger.error(f"Error consulting LLM: {e}")
         import traceback
 
-        log_message(traceback.format_exc())
-        
+        logger.error(traceback.format_exc())
+
         return default_move()
 
 
@@ -491,7 +471,7 @@ def call_openai_api(prompt, system_prompt=None):
             return None
 
     except Exception as e:
-        log_message(f"Error calling API: {e}")
+        logger.error(f"Error calling API: {e}")
         return None
 
 def roll_dice():
@@ -499,4 +479,5 @@ def roll_dice():
     try:
         gnubg.command("roll")
     except Exception as e:
+        logger.error(f"Error rolling dice: {e}")
         return None
