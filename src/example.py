@@ -1,13 +1,41 @@
+import os
 from .game import Game
-from .agents import LLMAgent, DebugAgent, RandomAgent
+from .agents import DebugAgent, RandomAgent, LLMAgent, LiveCodeAgent
+from .logger import Logger
+
+def create_agent(agent_type):
+    """Factory function to create agents based on type string"""
+    if agent_type == "DebugAgent":
+        return DebugAgent(inputs={"possible_moves": True, "hints": True, "best_move": True})
+    elif agent_type == "RandomAgent":
+        return RandomAgent()
+    elif agent_type == "LLMAgent":
+        return LLMAgent()
+    elif agent_type == "LiveCodeAgent":
+        return LiveCodeAgent()
+    else:
+        raise ValueError(f"Unknown agent type: {agent_type}")
 
 def main():
-    # Create agents
-    print("Initializing agents...")
-    agent0 = DebugAgent(inputs={"possible_moves": True, "hints": True, "best_move": True})
-    agent1 = RandomAgent()
+    # Get configuration from environment variables
+    log_file_name = os.getenv('GAME_LOG_FILE', 'game')
+    log_folder_name = os.getenv('GAME_LOG_FOLDER', 'output')
+    agent1_type = os.getenv('GAME_AGENT1', 'DebugAgent')
+    agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
 
+    logger = Logger(log_file=log_file_name, output_folder=log_folder_name, debug_mode=True)
+    logger.debug("Logger initialized")    
+    # Create agents
+    try:
+        agent0 = create_agent(agent1_type)
+        agent1 = create_agent(agent2_type)
+    except ValueError as e:
+        logger.error(f"Error creating agents: {e}")
+        return None
+    
     game = Game(agent0, agent1)
 
     # Play the game
-    return game.play()
+    result = game.play()
+    logger.info(f"Game finished. Winner: {result}")
+    return result

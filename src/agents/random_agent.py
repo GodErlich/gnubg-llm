@@ -1,4 +1,4 @@
-from utils import random_move
+from ..utils import random_move
 from .base import Agent
 from ..interfaces import AgentInputConfig, AgentInput
 from ..logger import logger

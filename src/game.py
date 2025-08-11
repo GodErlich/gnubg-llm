@@ -32,7 +32,7 @@ class Game:
         gnubg.command("set player 0 human")
         gnubg.command("set player 1 human")
 
-        logger.debug(f"starting new game with agents: {self.agent1}, {self.agent2}")
+        logger.debug(f"starting new game with agents: {self.agent1} vs {self.agent2}")
     def play(self):
         self.__init_game()
         self.turn_count = 0
