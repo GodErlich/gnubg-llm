@@ -1,8 +1,9 @@
+from unittest import result
 import gnubg
 import time
 
 from .agents import Agent
-from .utils import get_dice, get_simple_board, get_possible_moves, random_move, move_piece, roll_dice, get_hints, get_best_move
+from .utils import get_dice, get_simple_board, get_possible_moves, random_move, move_piece, roll_dice, get_hints, get_best_move, map_winner
 from .logger import logger
 
 class Game:
@@ -77,7 +78,9 @@ class Game:
         if "games" in match_info and match_info["games"]:
             latest_game = match_info["games"][-1]
             if "info" in latest_game and "winner" in latest_game["info"]:
-                return latest_game["info"]["winner"]
+                winner = map_winner(latest_game["info"]["winner"])  
+                logger.info(f"Game finished. Winner: {self.agent1 if winner == 0 else self.agent2}")
+                return winner
 
         logger.warning("No winner found in match info.")
         return None

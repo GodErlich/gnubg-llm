@@ -28,23 +28,24 @@ def run_batch_games(num_games, log_file_name="game", log_folder_name="output", a
     """Run multiple games and show summary"""
     print(f"Running {num_games} games...")
     
-    player_0_wins = 0
-    player_1_wins = 0
-    
+    agent1_wins = 0
+    agent2_wins = 0
+
     for i in range(num_games):
         if (i + 1) % 10 == 0:
             print(f"Progress: {i + 1}/{num_games}")
         
         winner = run_silent_game(log_file_name, log_folder_name, agent1, agent2, debug_mode)
-        print(f"Winner in game {i + 1}: Player {winner}")
         if winner == 0:
-            player_0_wins += 1
+            agent1_wins += 1
+        elif winner == 1:
+            agent2_wins += 1
         else:
-            player_1_wins += 1
-    
+            print(f"Game {i + 1} ended in an unknown state. Winner: {winner}")
+
     print(f"\n=== RESULTS ===")
-    print(f"Player 0 ({agent1}) won: {player_0_wins} times ({player_0_wins/num_games*100:.1f}%)")
-    print(f"Player 1 ({agent2}) won: {player_1_wins} times ({player_1_wins/num_games*100:.1f}%)")
+    print(f"Player 0 ({agent1}) won: {agent1_wins} times ({agent1_wins/num_games*100:.1f}%)")
+    print(f"Player 1 ({agent2}) won: {agent2_wins} times ({agent2_wins/num_games*100:.1f}%)")
 
 def main():
     parser = argparse.ArgumentParser(description='Run backgammon games with configurable agents')

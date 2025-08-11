@@ -28,4 +28,5 @@ except ImportError as e:
     raise
 
 if __name__ == "__main__":
-    main()
+    result = main()
+    sys.exit(result if result is not None else 0)

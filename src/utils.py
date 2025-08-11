@@ -483,3 +483,15 @@ def roll_dice():
     except Exception as e:
         logger.error(f"Error rolling dice: {e}")
         return None
+
+def map_winner(game_result):
+    """Map the game result to a winner."""
+    if game_result == 'O':
+        logger.debug(f"Game ended with agent1 winning.")
+        return 0
+    elif game_result == 'X':
+        logger.debug(f"Game ended with agent2 winning.")
+        return 1
+    else:
+        logger.warning(f"Unknown game result: {game_result}")
+        return "Unknown"

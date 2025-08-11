@@ -38,5 +38,4 @@ def main():
 
     # Play the game
     result = game.play()
-    logger.info(f"Game finished. Winner: {result}")
     return result
