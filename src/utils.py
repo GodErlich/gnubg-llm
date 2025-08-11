@@ -117,7 +117,7 @@ def new_default_board_representation() -> str:
 
     on_bar = f"Bar: X has {bar_X}, O has {bar_O}"
 
-    return f"Backgammon board state:\t{chr(10).join(board_state)}\t{on_bar}"
+    return f"Backgammon board state:\t{' ;'.join(board_state)}\t{on_bar}"
 
 
 def default_board_representation() -> str:
@@ -145,7 +145,7 @@ def default_board_representation() -> str:
 
     on_bar = f"Bar: X has {bar_X}, O has {bar_O}"
 
-    return f"Backgammon board state:\t{chr(10).join(board_state)}\t{on_bar}"
+    return f"Backgammon board state:\t{'\t'.join(board_state)}\t{on_bar}"
 
 def is_valid_move(move: str) -> bool:
     """Check if a move is valid."""
