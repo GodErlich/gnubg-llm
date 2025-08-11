@@ -62,7 +62,7 @@ def get_player_name() -> str:
     turn = posinfo["turn"]
     return "X" if turn == 1 else "O"
 
-def get_dice() -> tuple:
+def get_dice() -> Tuple[int, int]:
     """Get the current dice rolled."""
     posinfo = gnubg.posinfo()
     dice = posinfo["dice"]
@@ -70,7 +70,7 @@ def get_dice() -> tuple:
         logger.warning("No dice rolled yet.")
         return None
 
-def reverse_board(board: tuple) -> tuple:
+def reverse_board(board: Tuple[int, int]) -> Tuple[int, int]:
     """Reverse the board tuple to match the player's perspective. only reverses the first 24 positions, bar is not reversed."""
     reversed_board = []
     for i in range(24):
@@ -79,10 +79,13 @@ def reverse_board(board: tuple) -> tuple:
     reversed_board.append(board[24])  # Bar for X
     return tuple(reversed_board)
 
-def get_simple_board() -> tuple:
+"""
+    returns the board as a tuple. first tuple represents current player, second represents other player.
+"""
+def get_simple_board() -> Tuple[Tuple[int, ...], Tuple[int, ...]]:
     return gnubg.board()
 
-def get_board() -> tuple:
+def get_board() -> Tuple[Tuple[int, ...], Tuple[int, ...]]:
     """Get the current board state, O is always on 0 and X always on 1."""
     board_tuple = get_simple_board()
     posinfo = gnubg.posinfo()
@@ -114,10 +117,10 @@ def new_default_board_representation() -> str:
 
     on_bar = f"Bar: X has {bar_X}, O has {bar_O}"
 
-    return f"Backgammon board state:\n{chr(10).join(board_state)}\n{on_bar}"
+    return f"Backgammon board state:\t{chr(10).join(board_state)}\t{on_bar}"
 
 
-def default_board_representation(board: Tuple[int, int] = None) -> str:
+def default_board_representation() -> str:
     board_tuple = get_simple_board()
     posinfo = gnubg.posinfo()
     turn = posinfo["turn"]
@@ -142,7 +145,7 @@ def default_board_representation(board: Tuple[int, int] = None) -> str:
 
     on_bar = f"Bar: X has {bar_X}, O has {bar_O}"
 
-    return f"Backgammon board state:\n{chr(10).join(board_state)}\n{on_bar}"
+    return f"Backgammon board state:\t{chr(10).join(board_state)}\t{on_bar}"
 
 def is_valid_move(move: str) -> bool:
     """Check if a move is valid."""
@@ -214,10 +217,9 @@ def get_best_move() -> str:
         logger.error(f"Error with findbestmove: {e}")
         return None
 
-def default_move():
-    """ makes gnubg play the best move according to him."""
+def random_move():
+    """ makes a valid random move"""
     all_moves =  get_possible_moves()
-    # take random move
     if not all_moves or len(all_moves) == 0:
         logger.info("No possible moves found")
         return None
@@ -424,14 +426,14 @@ def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
             logger.debug(f"LLM recommended move: {move_choice['move']}")
             return move_choice
 
-        return default_move()
+        return random_move()
     except Exception as e:
         logger.error(f"Error consulting LLM: {e}")
         import traceback
 
         logger.error(traceback.format_exc())
 
-        return default_move()
+        return random_move()
 
 
 def call_openai_api(prompt, system_prompt=None):

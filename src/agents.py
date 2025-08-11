@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from .interfaces import AgentInputConfig, AgentInput
-from .utils import default_board_representation, default_move, consult_llm
+from .utils import default_board_representation, random_move, consult_llm
 from .logger import logger
 
 class Agent(ABC):
@@ -13,6 +13,11 @@ class Agent(ABC):
         if inputs is not None:
             self.inputs = inputs
 
+    def __str__(self):
+        return self.__class__.__name__
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"
 
     @abstractmethod
     def choose_move(self, board, possible_moves=None, hints=None, prompt=None):
@@ -41,7 +46,7 @@ class GnuBGAgent(Agent):
 
     def choose_move(self, board, extra_input: AgentInput = None):
         """Use gnubg to select a move."""
-        move = default_move()
+        move = random_move()
         return move
 
 class LLMAgent(Agent):
@@ -53,7 +58,7 @@ class LLMAgent(Agent):
 
     def choose_move(self, board, extra_input: AgentInput = None):
         try:
-            board_repr = self.board_representation(board)
+            board_repr = self.board_representation()
             possible_moves = extra_input.get("possible_moves", [])
 
             chosen_move_data = consult_llm(board_repr, prompt=self.defaultPrompt, system_prompt=self.system_prompt, possible_moves=possible_moves)
@@ -86,11 +91,11 @@ class DebugAgent(Agent):
         possible_moves = extra_input.get("possible_moves", [])
         hints = extra_input.get("hints", [])
         best_move = extra_input.get("best_move", None)
-        logger.debug(f"DebugAgent: {self.board_representation(board)}")
-        logger.debug(f"DebugAgent: Possible Moves: {possible_moves}")
-        logger.debug(f"DebugAgent: Hints: {hints}")
-        logger.debug(f"DebugAgent: Best Move: {best_move}")
-        move = default_move()
+        logger.debug(f"{self.board_representation()}")
+        logger.debug(f"Possible Moves: {possible_moves}")
+        logger.debug(f"Hints: {hints}")
+        logger.debug(f"Best Move: {best_move}")
+        move = random_move()
         return move
 
 class RandomAgent(Agent):
@@ -122,7 +127,7 @@ class LiveCodeAgent(Agent):
     def choose_move(self, board, extra_input: AgentInput = None):
         """Use live code to select a move."""
         try:
-            board_repr = self.board_representation(board)
+            board_repr = self.board_representation()
             possible_moves = extra_input.get("possible_moves", [])
             hints = extra_input.get("hints", [])
             best_move = extra_input.get("best_move", None)

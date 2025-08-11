@@ -2,7 +2,7 @@ import gnubg
 import time
 
 from .agents import Agent
-from .utils import get_simple_board, get_possible_moves, default_move, move_piece, roll_dice, get_hints, get_best_move
+from .utils import get_dice, get_simple_board, get_possible_moves, random_move, move_piece, roll_dice, get_hints, get_best_move
 from .logger import logger
 
 class Game:
@@ -32,19 +32,26 @@ class Game:
         gnubg.command("set player 0 human")
         gnubg.command("set player 1 human")
 
+        logger.debug(f"starting new game with agents: {self.agent1}, {self.agent2}")
     def play(self):
         self.__init_game()
         self.turn_count = 0
         while self.turn_count < self.max_turns and not self.__is_game_over():
             self.turn_count += 1
+            logger.debug(f"Turn {self.turn_count} starting...")
             posinfo = gnubg.posinfo()
             board = get_simple_board()
             turn = posinfo["turn"]
+            curr_player = self.agent1 if turn == 0 else self.agent2
+
+            logger.debug(f"Turn {self.turn_count}, Player {curr_player} - Board: {board}")
             roll_dice()
+            logger.debug(f"Player {curr_player} rolled dice: {get_dice()}")
             possible_moves = get_possible_moves()
             hints = get_hints()
             best_move = get_best_move()
-            board = get_simple_board()
+            # board = get_simple_board()
+            logger.debug(f"Possible moves: {possible_moves}, Hints: {hints}, Best move: {best_move}")
             if turn == 0:
                 extra_input = self.agent1.filter_inputs(possible_moves, hints, best_move)
                 move = self.agent1.choose_move(board, extra_input)
@@ -53,9 +60,10 @@ class Game:
                 move = self.agent2.choose_move(board, extra_input)
             if move:
                 move_piece(move)
+                logger.debug(f"Player {curr_player} moved: {move}")
             else:
-                print(f"Agent {turn} did not choose a valid move. gnubg will play automatically.")
-                move = default_move()
+                logger.warning(f"Agent {curr_player} did not choose a valid move. an automatic move will be played.")
+                move = random_move()
                 move_piece(move)
 
             time.sleep(1)

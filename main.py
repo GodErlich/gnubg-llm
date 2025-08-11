@@ -9,7 +9,7 @@ def run_silent_game():
         result = subprocess.run([
             "gnubg", "-t", "-p", "app.py"
         ], stdout=devnull, stderr=devnull, capture_output=False)
-    
+
     # You'll need to modify main.py to output just the winner
     # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
     return result.returncode
