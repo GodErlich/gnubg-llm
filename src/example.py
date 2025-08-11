@@ -1,5 +1,5 @@
 from .game import Game
-from .agents import GnuBGAgent, LLMAgent, DebugAgent, RandomAgent
+from .agents import LLMAgent, DebugAgent, RandomAgent
 
 def main():
     # Create agents
