@@ -53,13 +53,12 @@ the agent will decide what to do with the above input + additional text(prompt),
 
 
 ## Create new agents
-If you want to add a new agent with different behavior, add a new file called "YourAgentName.py".
-In this file create an Agent class (for reference look into RandomAgent.py), lastly customize the 
-function choose_move.
+If you want to add a new agent with different behavior, add a new file called "your_agent_name.py" to the agents folder under src, then add the import in the __init__.py file inside the agents folder.
+In this file create an Agent class (for reference look into random_agent.py), lastly customize the
+function choose_move as you wish.
 
 ## Run the game in batches
-Also we could run the game loop few time by configuration in order to 
-get statistics on the ability of our agents.
+We could run the game loop more than once to get statistics on the ability of our agents.
 
 
 ## Additional customization ( proceed with caution )
