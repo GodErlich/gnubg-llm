@@ -16,11 +16,11 @@ dotenv.load_dotenv()
 LLM_API_URL = os.getenv("LLM_API_URL")
 LLM_API_KEY = os.getenv("LLM_API_KEY")
 
+output_dir = "output"
 
-if not os.path.exists("src/output"):
-    os.makedirs("src/output")
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
-output_dir = "src/output"
 log_file_name = f"game_log_{time.strftime('%Y%m%d_%H%M%S')}.txt"
 LOG_FILE = os.path.join(output_dir, log_file_name)
 
