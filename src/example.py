@@ -22,17 +22,18 @@ def main():
     log_folder_name = os.getenv('GAME_LOG_FOLDER', 'output')
     agent1_type = os.getenv('GAME_AGENT1', 'DebugAgent')
     agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
+    debug_mode = os.getenv('GAME_DEBUG_MODE', 'true').lower() == 'true'
 
-    logger = Logger(log_file=log_file_name, output_folder=log_folder_name, debug_mode=True)
-    logger.debug("Logger initialized")    
-    # Create agents
+    # Initialize logger with custom parameters
+    logger = Logger(log_file=log_file_name, output_folder=log_folder_name, debug_mode=debug_mode)
+    
     try:
         agent0 = create_agent(agent1_type)
         agent1 = create_agent(agent2_type)
     except ValueError as e:
         logger.error(f"Error creating agents: {e}")
         return None
-    
+
     game = Game(agent0, agent1)
 
     # Play the game

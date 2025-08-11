@@ -24,7 +24,7 @@ def run_silent_game(log_file_name, log_folder_name, agent1, agent2, debug_mode):
     # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
     return result.returncode
 
-def run_batch_games(num_games, log_file_name="game", log_folder_name="output", agent1="DebugAgent", agent2="RandomAgent"):
+def run_batch_games(num_games, log_file_name="game", log_folder_name="output", agent1="DebugAgent", agent2="RandomAgent", debug_mode=True):
     """Run multiple games and show summary"""
     print(f"Running {num_games} games...")
     
@@ -60,6 +60,8 @@ def main():
                         help='Agent type for player 2 (default: RandomAgent)')
     parser.add_argument('--number_of_games', type=int, default=1,
                         help='Number of games to play (default: 1)')
+    parser.add_argument('--debug_mode', action='store_true', default=True,
+                        help='Enable debug mode for detailed logging (default: False)') #TODO: return debug mode to false
     
     args = parser.parse_args()
     
