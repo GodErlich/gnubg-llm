@@ -1,11 +1,35 @@
-This code uses [gnubg module](https://www.gnu.org/software/gnubg/) to create backgamon "agents".
+# 🎲 GNU Backgammon Research Environment
+
+[![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)
+[![Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml/badge.svg)](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)
+
+This code uses [gnubg module](https://www.gnu.org/software/gnubg/) to create backgammon "agents".
 
 It will be used by other developers to research different agents by themselves and let them play
 against each other.
 This code is an infrastructure for research.
 
+## 🚀 Try It Now - No Installation Required!
 
-## Prequisites:
+### Option 1: GitHub Codespaces
+1. Click the green **"Code"** button above
+2. Select **"Codespaces"** tab
+3. Click **"Create codespace on main"**
+4. Wait for setup (2-3 minutes) - everything installs automatically!
+5. Run: `python3 main.py` in the terminal
+
+### Option 2: Gitpod
+1. Click the **[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)** badge above
+2. Sign in with GitHub
+3. Wait for environment setup
+4. Start experimenting!
+
+### Option 3: View Live Demos
+- **[Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)**: See automated test runs
+- Click **"Run workflow"** to trigger custom demos with your preferred settings
+
+## Prerequisites for Local Setup:
 ### Windows OS
 1. Install WSL2
 (In powershell as admin run: `wsl --install` or  [install manually](https://documentation.ubuntu.com/wsl/latest/howto/install-ubuntu-wsl2/))
@@ -248,6 +272,40 @@ When you are done, change the import in the main.py file to your file.
 In line 26 in main.py file: "from src.example import main" change to "from src.yourfile import main"
 
 You can also change directly the code in example.py file.
+
+
+## 🌐 Cloud Development Features
+
+### GitHub Codespaces Benefits:
+- ✅ **Full Ubuntu environment** with all dependencies pre-installed
+- ✅ **VS Code in browser** with Python extensions
+- ✅ **Instant setup** - no local installation needed
+- ✅ **Team collaboration** - share workspaces easily
+- ✅ **Consistent environment** - same setup for everyone
+
+### Available Workflows:
+1. **Demo Workflow** (`/.github/workflows/demo.yml`):
+   - Runs automatically on push/PR
+   - Manual trigger with custom agent selection
+   - Tests installation and runs sample games
+
+### Quick Commands in Cloud Environment:
+```bash
+# Run a single game
+python3 main.py
+
+# Run 3 games with debug mode
+python3 main.py --a1 RandomAgent --a2 RandomAgent --n 3 --d
+
+```
+
+## 🔧 Development Container Details
+
+The project includes a complete dev container configuration:
+- **Base**: Ubuntu 22.04 with Python 3.11
+- **Includes**: GNU Backgammon, Python dev tools, VS Code extensions
+- **Auto-setup**: Runs [`setup.sh`](.devcontainer/setup.sh:1) on container creation
+- **Ready-to-use**: No manual setup required
 
 
 # Additional links

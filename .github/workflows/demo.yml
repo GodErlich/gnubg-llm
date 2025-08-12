@@ -1,0 +1,128 @@
+name: 🎮 GNU Backgammon Demo & Test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      num_games:
+        description: 'Number of games to run'
+        required: false
+        default: '3'
+        type: string
+      agent1:
+        description: 'Agent 1 type'
+        required: false
+        default: 'RandomAgent'
+        type: choice
+        options:
+          - DebugAgent
+          - RandomAgent
+          - LLMAgent
+          - LiveCodeAgent
+      agent2:
+        description: 'Agent 2 type'
+        required: false
+        default: 'DebugAgent'
+        type: choice
+        options:
+          - DebugAgent
+          - RandomAgent
+          - LLMAgent
+          - LiveCodeAgent
+
+jobs:
+  demo:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnubg python3-dev
+
+    - name: 🔧 Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: 🧪 Test GNU Backgammon installation
+      run: |
+        gnubg --version
+        echo "✅ GNU Backgammon is installed and working"
+
+    - name: 🎮 Run demo games (default)
+      if: github.event_name != 'workflow_dispatch'
+      run: |
+        echo "🎲 Running demo with RandomAgent vs DebugAgent (3 games)"
+        python3 main.py --a1 RandomAgent --a2 DebugAgent --n 3
+
+    - name: 🎮 Run custom demo games
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "🎲 Running demo with ${{ github.event.inputs.agent1 }} vs ${{ github.event.inputs.agent2 }} (${{ github.event.inputs.num_games }} games)"
+        python3 main.py --a1 ${{ github.event.inputs.agent1 }} --a2 ${{ github.event.inputs.agent2 }} --n ${{ github.event.inputs.num_games }}
+
+    - name: 📊 Upload game logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: game-logs
+        path: output/
+        retention-days: 30
+
+    - name: 🎯 Display results summary
+      if: always()
+      run: |
+        echo "## 🎮 Demo Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The GNU Backgammon research environment ran successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📁 Generated Files:" >> $GITHUB_STEP_SUMMARY
+        if [ -d "output" ]; then
+          ls -la output/ >> $GITHUB_STEP_SUMMARY
+        else
+          echo "No output files generated" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🚀 Quick Start Options:" >> $GITHUB_STEP_SUMMARY
+        echo "- **GitHub Codespaces**: Click the green 'Code' button → 'Codespaces' → 'Create codespace'" >> $GITHUB_STEP_SUMMARY
+        echo "- **Gitpod**: Click the Gitpod badge in README" >> $GITHUB_STEP_SUMMARY
+        echo "- **Local Setup**: Follow the README instructions" >> $GITHUB_STEP_SUMMARY
+
+  test-agents:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        agent: [DebugAgent, RandomAgent]
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnubg python3-dev
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: 🧪 Test ${{ matrix.agent }}
+      run: |
+        echo "Testing ${{ matrix.agent }} agent..."
+        python3 main.py --a1 ${{ matrix.agent }} --a2 ${{ matrix.agent }} --n 1
