@@ -1,8 +1,8 @@
 # 🎲 GNU Backgammon Research Environment
-
-[![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/colab_demo.ipynb)
+<!-- [![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)
-[![Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml/badge.svg)](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)
+[![Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml/badge.svg)](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml) -->
 
 This code uses [gnubg module](https://www.gnu.org/software/gnubg/) to create backgammon "agents".
 
