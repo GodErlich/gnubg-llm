@@ -163,23 +163,8 @@ Executes a checker move using gnubg's move notation. The move command accepts va
 - Must move from bar first if any checkers are on the bar
 - Must bear off legally when in home board and no checkers behind
 
-#### Usage in Code:
-```python
-# Single move
-gnubg.command("move 13/9")
-
-# Multiple moves (dice showing 4,2)
-gnubg.command("move 13/9 24/22")
-
-# Move with hit
-gnubg.command("move 24/20*")
-
-# Invalid moves will cause gnubg to ignore the command
-# Use get_possible_moves() to get valid move options
-```
-
 #### Error Handling:
-If an invalid move is provided, gnubg will ignore the command. Always validate moves using [`get_possible_moves()`](src/utils.py:179) before executing, or use [`move_piece()`](src/utils.py:161) which includes error handling.
+If an invalid move is provided, gnubg will ignore the command. Always use [`move_piece()`](src/utils.py:161) which includes error handling.
 
 ### gnubg.hint()
 Returns detailed move analysis including:
@@ -207,7 +192,6 @@ Returns comprehensive match information including:
 - **[`gnubg.pip()`](src/utils.py:43)** - Returns pip count (distance to finish) for each player
 - **[`gnubg.positionid()`](src/utils.py:50)** - Returns unique position identifier
 - **[`gnubg.evaluate()`](src/utils.py:36)** - Returns detailed position evaluation
-
 
 
 ## What is an agent in the project context?
