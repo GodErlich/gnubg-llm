@@ -1,5 +1,4 @@
 # GNU Backgammon Setup Makefile
-# Replaces setup.sh with improved dependency management and parallel builds
 
 .PHONY: all install deps clone build test clean help
 .DEFAULT_GOAL := help
