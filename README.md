@@ -17,13 +17,13 @@ This code is an infrastructure for research.
 Open bash where you want to clone the project. (Windows users open WSL). Then run the following commands:
 1. git clone https://github.com/GodErlich/gnubg-llm.git
 2. cd gnubg-llm
-3. chmod +x setup.sh && ./setup.sh # might take some time
+3. make all # Complete setup - might take some time
 
 Now to open in vscode write: `code .` or open the cloned project with your favorite IDE
 
 ## How to run?
 1. Make sure you are inside the root folder of the project
-2. Make sure you ran the setup.sh file. If not run: `chmod +x setup.sh && ./setup.sh`
+2. Make sure you ran the setup. If not run: `make all`
 3. In the terminal write: `python3 main.py`
 4. If you wish to stop the run in the middle, just click `Ctrl + c` in the terminal.
 
@@ -51,22 +51,27 @@ Just duplicate `example.env` file change the duplicated file name to .env and pu
 
 ## Important Files Explanations
 
-### 1. setup.sh
-This script sets up the complete GNU Backgammon development environment by:
-- Installing system dependencies (Python 3, build tools, libraries required for gnubg compilation)
-- Downloading and compiling GNU Backgammon from source with Python bindings enabled
-- Installing Python package dependencies globally (needed because gnubg has embedded Python)
-- Testing the installation to ensure everything works correctly
+### 1. Makefile
+The Makefile provides a comprehensive build system:
+
+**Common Commands:**
+- `make all` - Complete setup
+- `make help` - Show all available targets
+- `make status` - Check installation status
+- `make deps` - Install only system dependencies
+- `make clean` - Clean build artifacts
+- `make update` - Update GNU Backgammon to latest version
+- `make uninstall` - Remove GNU Backgammon from system
 
 This comprehensive setup is necessary because gnubg requires specific compilation flags and system libraries to enable Python scripting support. Currently there is no other way to install gnubg full engine. There is a PyPi
 package of gnubg, but the package can't run game, only evaluate them.
 
-### 2. requirements.txt
+### 3. requirements.txt
 Please notice this is not a classic requirements.txt file. This file will install additional requirements to the
 gnubg environment, This is needed because gnubg runs on its own seperated environment. This is why there is no
 `gnubg` package in the requirements.txt file.
 
-3. .env
+### 4. .env
 This file will store url and secret key, that will allow it to ask the llm provider questions.
 You have to create this file by yourself. Just duplicate `example.env` file change the name to .env
 and put the real values in there.
