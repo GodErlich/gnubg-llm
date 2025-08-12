@@ -58,7 +58,8 @@ This script sets up the complete GNU Backgammon development environment by:
 - Installing Python package dependencies globally (needed because gnubg has embedded Python)
 - Testing the installation to ensure everything works correctly
 
-This comprehensive setup is necessary because gnubg requires specific compilation flags and system libraries to enable Python scripting support.
+This comprehensive setup is necessary because gnubg requires specific compilation flags and system libraries to enable Python scripting support. Currently there is no other way to install gnubg full engine. There is a PyPi
+package of gnubg, but the package can't run game, only evaluate them.
 
 ### 2. requirements.txt
 Please notice this is not a classic requirements.txt file. This file will install additional requirements to the
