@@ -1,5 +1,5 @@
 # 🎲 GNU Backgammon Research Environment
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/colab_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/demo.ipynb)
 <!-- [![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)
 [![Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml/badge.svg)](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml) -->
@@ -20,7 +20,7 @@ This code is an infrastructure for research.
 5. Run: `python3 main.py` in the terminal
 
 ### Option 2: Google Colab (No Account Required)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/colab_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/demo.ipynb)
 1. Click the **"Open In Colab"** badge above
 2. **No sign-up required** - runs immediately
 3. Click **"Run All"** to set up everything automatically
