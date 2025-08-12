@@ -6,20 +6,24 @@ This code is an infrastructure for research.
 
 
 ## Prequisites:
-## Windows OS
-1. Install WSL2 + Ubuntu 22.04 (you can run: `wsl --install Ubuntu-22.04` or install manually)
-2. Follow linux quick start
+### Windows OS
+1. Install WSL2
+(In powershell as admin run: `wsl --install` or  [install manually](https://documentation.ubuntu.com/wsl/latest/howto/install-ubuntu-wsl2/))
+2. Ubuntu 22.04+
+(In powershell as admin run: `wsl --install Ubuntu-24.04` or [install manually](https://documentation.ubuntu.com/wsl/latest/howto/install-ubuntu-wsl2/))
+3. Follow linux quick start
 
-## Linux(Ubunto) OS
-1. None
+### Linux
+- **Linux**: Ubuntu 22.04+ or Debian 11+
+- **Package Manager**: `apt` with `sudo` access
+- **Python**: 3.8+
 
 ## Quick start
 Open bash where you want to clone the project. (Windows users open WSL). Then run the following commands:
 1. git clone https://github.com/GodErlich/gnubg-llm.git
 2. cd gnubg-llm
-3. make all # Complete setup - might take some time
-
-Now to open in vscode write: `code .` or open the cloned project with your favorite IDE
+3. make all # Complete setup - might take 30-60 seconds.
+4. Optional - To open in vscode write: `code .` or open the cloned project with your favorite IDE
 
 ## How to run?
 1. Make sure you are inside the root folder of the project
