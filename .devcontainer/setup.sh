@@ -29,6 +29,11 @@ else
     echo "⚠️ No requirements.txt found, skipping Python dependencies"
 fi
 
+# Install Jupyter and additional packages for interactive demos
+echo "📓 Installing Jupyter and demo dependencies..."
+pip3 install --user jupyter ipywidgets matplotlib pandas
+echo "✅ Jupyter environment ready"
+
 # Test installation
 echo "🧪 Testing GNU Backgammon installation..."
 if gnubg --version > /dev/null 2>&1; then

@@ -23,7 +23,8 @@ This code is an infrastructure for research.
 1. Click the **[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)** badge above
 2. Sign in with GitHub
 3. Wait for environment setup
-4. Start experimenting!
+4. **Interactive Demo**: Open [`demo.ipynb`](demo.ipynb:1) for guided exploration
+5. Start experimenting!
 
 ### Option 3: View Live Demos
 - **[Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)**: See automated test runs

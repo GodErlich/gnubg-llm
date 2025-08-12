@@ -22,6 +22,8 @@
         "ms-python.pylint",
         "ms-python.black-formatter",
         "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
         "redhat.vscode-yaml",
         "ms-vscode.makefile-tools"
       ],
