@@ -140,7 +140,46 @@ Executes any gnubg command. Common commands used in this project:
 - `"play"` - Makes an automatic move
 
 ### gnubg.command('move move_cmd')
+Executes a checker move using gnubg's move notation. The move command accepts various formats:
 
+#### Basic Move Formats:
+- **Single Move**: `"move 24/22"` - Move one checker from point 24 to point 22
+- **Multiple Moves**: `"move 13/11 8/6"` - Move one checker from 13 to 11 AND one checker from 8 to 6
+- **Same Point Multiple Moves**: `"move 6/4 6/4"` - Move two checkers from point 6 to point 4
+
+#### Special Move Notations:
+- **Hit and Move**: `"move 24/22*"` - Move from 24 to 22 and hit opponent's checker (the `*` indicates a hit)
+- **Move from Bar**: `"move bar/22"` - Move a checker from the bar to point 22
+- **Bear Off**: `"move 6/off"` - Bear off a checker from point 6 (when in bearing off phase)
+
+#### Advanced Move Examples:
+- **Complex Multi-Move**: `"move 13/11 24/22 8/6 6/4"` - Four separate moves in one turn (when doubles are rolled)
+- **Hit and Continue**: `"move 24/22*/20"` - Move from 24 to 22 (hitting), then continue same checker to 20
+- **Bar to Hit**: `"move bar/22*"` - Move from bar to point 22 and hit opponent's checker
+
+#### Move Validation:
+- Moves must correspond to dice rolled (e.g., with dice 3,2 you can move 3 and 2 points)
+- Cannot move to points occupied by 2+ opponent checkers
+- Must move from bar first if any checkers are on the bar
+- Must bear off legally when in home board and no checkers behind
+
+#### Usage in Code:
+```python
+# Single move
+gnubg.command("move 13/9")
+
+# Multiple moves (dice showing 4,2)
+gnubg.command("move 13/9 24/22")
+
+# Move with hit
+gnubg.command("move 24/20*")
+
+# Invalid moves will cause gnubg to ignore the command
+# Use get_possible_moves() to get valid move options
+```
+
+#### Error Handling:
+If an invalid move is provided, gnubg will ignore the command. Always validate moves using [`get_possible_moves()`](src/utils.py:179) before executing, or use [`move_piece()`](src/utils.py:161) which includes error handling.
 
 ### gnubg.hint()
 Returns detailed move analysis including:
