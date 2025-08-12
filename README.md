@@ -19,14 +19,21 @@ This code is an infrastructure for research.
 4. Wait for setup (2-3 minutes) - everything installs automatically!
 5. Run: `python3 main.py` in the terminal
 
-### Option 2: Gitpod
+### Option 2: Google Colab (No Account Required)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/colab_demo.ipynb)
+1. Click the **"Open In Colab"** badge above
+2. **No sign-up required** - runs immediately
+3. Click **"Run All"** to set up everything automatically
+4. **Uses your project's Makefile and scripts** - complete integration!
+
+### Option 3: Gitpod
 1. Click the **[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)** badge above
 2. Sign in with GitHub
 3. Wait for environment setup
 4. **Interactive Demo**: Open [`demo.ipynb`](demo.ipynb:1) for guided exploration
 5. Start experimenting!
 
-### Option 3: View Live Demos
+### Option 4: View Live Demos
 - **[Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)**: See automated test runs
 - Click **"Run workflow"** to trigger custom demos with your preferred settings
 
