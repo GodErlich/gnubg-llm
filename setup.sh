@@ -13,10 +13,12 @@ sudo apt-get update && sudo apt-get install -y \
 mkdir -p ~/gnubg-workspace
 cd ~/gnubg-workspace
 
+# Clone GNU Backgammon repository if it doesn't exist
 if [ ! -d "gnubg" ]; then
     git clone --depth 1 --branch release-1_08_003 https://git.savannah.gnu.org/git/gnubg.git
 fi
 
+# Build and install GNU Backgammon
 cd gnubg
 ./autogen.sh
 ./configure --without-gtk --enable-simd=sse2 --enable-python
@@ -24,7 +26,6 @@ make -j$(nproc)
 sudo make install
 sudo ldconfig
 
-cd ~/gnubg-llm
 pip3 install --user -r requirements.txt # Install Python dependencies globally because gnubg has embedded Python.
 
 
