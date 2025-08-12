@@ -224,6 +224,11 @@ function choose_move as you wish.
 ### Run the game in batches
 We could run the game loop more than once to get statistics on the ability of our agents.
 
+### Run gnubg directly (not recommended)
+using: gnubg -p main.py
+will run gnubg directly without filtering any logs, only one game at a time.
+
+
 ### Debugging
 Debugging the code is not simple because gnubg engine uses compiled binary files.
 The solution for it is using ([pdb.](https://docs.python.org/3/library/pdb.html)).
