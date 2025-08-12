@@ -82,11 +82,11 @@ and output a text representation of the board.( there is imlemented default func
 
 ### gnubg.move('move')
 
-### 
+### other commands that are used in the code...
 
 
 
-## What is an agent?
+## What is an agent in the project context?
 Agent will get as input these parameters:
 1. only the board ( make sure no invalid move happen)
 2. board and all possible moves
@@ -105,10 +105,12 @@ If you want to add a new agent with different behavior, add a new file called "y
 In this file create an Agent class (for reference look into random_agent.py), lastly customize the
 function choose_move as you wish.
 
-## Run the game in batches
+## Features: 
+
+### Run the game in batches
 We could run the game loop more than once to get statistics on the ability of our agents.
 
-# Debugging
+### Debugging
 Debugging the code is not simple because gnubg engine uses compiled binary files.
 The solution for it is using ([pdb.](https://docs.python.org/3/library/pdb.html)).
 Works only when running gnubg directly by writing ( gnubg -p main.py )
@@ -116,7 +118,7 @@ Works only when running gnubg directly by writing ( gnubg -p main.py )
 2. The program will break there in the console.
 
 
-## Additional customization ( proceed with caution )
+### Additional customization ( proceed with caution )
 To change the code that runs, create a yourfile.py file in the src folder with a main function, you can check example.py for reference.
 use game class to create a game, add agents and their configurations.
 When you are done, change the import in the main.py file to your file.
@@ -124,5 +126,6 @@ In line 26 in main.py file: "from src.example import main" change to "from src.y
 
 You can also change directly the code in example.py file.
 
-## Additional links
+
+# Additional links
 [gnubg offical python docs](https://www.gnu.org/software/gnubg/manual/html_node/Python-scripting.html)
