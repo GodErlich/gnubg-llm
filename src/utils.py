@@ -226,47 +226,6 @@ def random_move():
     
     return all_moves[0]
 
-def get_game_context():
-    """Get the current game context including position evaluation"""
-    context = {}
-
-    try:
-        # Get current dice
-        match_info = gnubg.match()
-        games = match_info.get("games", [])
-        if games and len(games) > 0:
-            latest_game = games[-1]
-            game_actions = latest_game.get("game", [])
-            if game_actions and len(game_actions) > 0:
-                latest_action = game_actions[-1]
-                context["dice"] = latest_action.get("dice", None)
-                context["player"] = latest_action.get("player", None)
-
-        # Get position evaluation if available
-        try:
-            evaluation = gnubg.evaluate()
-            context["evaluation"] = evaluation
-        except:
-            pass
-
-        # Get pip count (distance to finish)
-        try:
-            pip_count = gnubg.pip()
-            context["pip_count"] = pip_count
-        except:
-            pass
-
-        # Get position ID for reference
-        try:
-            context["position_id"] = gnubg.positionid()
-        except:
-            pass
-
-        return context
-    except Exception as e:
-        logger.error(f"Error getting game context: {e}")
-        return {}
-
 
 def default_prompt(board_repr=None):
     # Extract the list of moves from the hint data

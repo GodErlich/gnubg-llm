@@ -49,12 +49,18 @@ Will run the game for 3 times with RandomAgent vs RandomAgent and additional deb
 To run Agents that uses llm you have to create .env file with your parameters.
 Just duplicate `example.env` file change the duplicated file name to .env and put the real values in there.
 
-## Important Files Explainations
-1. setup.sh
-This script does ...
-because ...
+## Important Files Explanations
 
-2. requirments.txt
+### 1. setup.sh
+This script sets up the complete GNU Backgammon development environment by:
+- Installing system dependencies (Python 3, build tools, libraries required for gnubg compilation)
+- Downloading and compiling GNU Backgammon from source with Python bindings enabled
+- Installing Python package dependencies globally (needed because gnubg has embedded Python)
+- Testing the installation to ensure everything works correctly
+
+This comprehensive setup is necessary because gnubg requires specific compilation flags and system libraries to enable Python scripting support.
+
+### 2. requirements.txt
 Please notice this is not a classic requirements.txt file. This file will install additional requirements to the
 gnubg environment, This is needed because gnubg runs on its own seperated environment. This is why there is no
 `gnubg` package in the requirements.txt file.
@@ -64,25 +70,104 @@ This file will store url and secret key, that will allow it to ask the llm provi
 You have to create this file by yourself. Just duplicate `example.env` file change the name to .env
 and put the real values in there.
 
-# gnubg documentation
+## Python Files Explanations
 
-## all available commands + explain each one
-    board(): Returns the current board state.
-    command(cmd): Executes a gnubg command-line command.
-    evaluate(): Evaluates the current position.
-    match(): Returns information about the current match.
+### Core Files
+- **[`main.py`](main.py:1)** - Entry point for batch game execution. Handles command-line arguments, manages multiple game runs, and provides statistics. Uses subprocess to run games silently via gnubg.
+- **[`app.py`](app.py:1)** - Bridge script that sets up the Python environment and imports the game logic. This is the file that gnubg actually executes with the `-p` flag.
 
-### gnubg.board() 
-Returns 2 tuples of size 25. Each index represents the number of "pawns" in the position. The last index represents the Bar(When pawn gets eaten he is sent to the middle, which is called Bar)
+### Source Directory ([`src/`](src/))
+- **[`example.py`](src/example.py:1)** - Main game orchestrator that reads environment variables, creates agents, initializes logging, and starts a single game.
+- **[`game.py`](src/game.py:1)** - Core game loop implementation. Manages turns, dice rolling, move validation, and determines winners.
+- **[`utils.py`](src/utils.py:1)** - Utility functions for board operations, move validation, LLM integration, and gnubg command wrappers.
+- **[`logger.py`](src/logger.py:1)** - Singleton logger class that handles file and console logging with different severity levels.
+- **[`interfaces.py`](src/interfaces.py:1)** - TypedDict definitions for type safety across agent inputs and hint structures.
 
-The user could write a function that gets the board from gnubg, 
-and output a text representation of the board.( there is imlemented default function for it called `default_board_representation`)
+### Agents Directory ([`src/agents/`](src/agents/))
+- **[`base.py`](src/agents/base.py:1)** - Abstract base class defining the agent interface and input filtering mechanism.
+- **[`random_agent.py`](src/agents/random_agent.py:1)** - Simple agent that selects random valid moves from available options.
+- **[`debug_agent.py`](src/agents/debug_agent.py:1)** - Development agent that logs detailed game state information while making random moves.
+- **[`llm_agent.py`](src/agents/llm_agent.py:1)** - AI agent that uses external LLM APIs to analyze positions and select moves based on strategic reasoning.
+- **[`live_code_agent.py`](src/agents/live_code_agent.py:1)** - Experimental agent that asks an LLM to generate Python code for move selection and executes it dynamically.
+- **[`__init__.py`](src/agents/__init__.py:1)** - Package initialization file that exports all agent classes.
 
-### gnubg.commnad('cmd')
+## Project Flow
 
-### gnubg.move('move')
+The project follows this execution flow:
 
-### other commands that are used in the code...
+1. **Entry Point**: [`main.py`](main.py:1) parses command-line arguments and starts batch execution
+2. **Game Launcher**: For each game, [`main.py`](main.py:1) calls `gnubg -t -p app.py` with environment variables
+3. **Environment Setup**: [`app.py`](app.py:1) sets up Python paths and imports [`src.example.main`](src/example.py:19)
+4. **Game Initialization**: [`example.py`](src/example.py:1) reads config from environment, creates agents and logger, initializes a [`Game`](src/game.py:9) instance
+5. **Game Loop**: [`game.py`](src/game.py:1) runs the main game loop:
+   - Checks for game end conditions
+   - Determines current player
+   - Rolls dice using gnubg
+   - Gets available moves, hints, and best moves from gnubg
+   - Calls agent's [`choose_move()`](src/agents/base.py:23) method
+   - Validates and executes the chosen move
+   - Repeats until game ends or max turns reached
+6. **Agent Decision**: Each agent type implements its own strategy:
+   - **RandomAgent**: Picks randomly from valid moves
+   - **DebugAgent**: Logs detailed information then picks randomly
+   - **LLMAgent**: Sends game state to external LLM for strategic analysis
+   - **LiveCodeAgent**: Asks LLM to generate and execute Python code
+7. **Logging**: Throughout execution, [`logger.py`](src/logger.py:1) records game events and debug information
+8. **Results**: Game winner is determined and returned to [`main.py`](main.py:1) for statistics tracking
+
+## gnubg Documentation
+
+### Core Functions
+- **[`gnubg.board()`](src/utils.py:86)** - Returns the current board state
+- **[`gnubg.command(cmd)`](src/utils.py:171)** - Executes a gnubg command-line command
+- **[`gnubg.evaluate()`](src/utils.py:36)** - Evaluates the current position
+- **[`gnubg.match()`](src/utils.py:24)** - Returns information about the current match
+- **[`gnubg.hint()`](src/utils.py:181)** - Gets move suggestions with equity evaluations
+- **[`gnubg.posinfo()`](src/utils.py:43)** - Returns position information including current player and dice
+
+### gnubg.board()
+Returns 2 tuples of size 25. Each index represents the number of checkers in that position. The last index (24) represents the Bar (when a checker gets hit, it's sent to the middle bar).
+
+The first tuple represents the current player's checkers, the second tuple represents the opponent's checkers. Use [`get_simple_board()`](src/utils.py:85) to get raw board data or [`default_board_representation()`](src/utils.py:123) for human-readable format.
+
+### gnubg.command('cmd')
+Executes any gnubg command. Common commands used in this project:
+- `"new game"` - Starts a new game
+- `"set player 0 human"` - Sets player 0 to human control
+- `"set player 1 human"` - Sets player 1 to human control
+- `"roll"` - Rolls the dice
+- `"move X/Y"` - Moves a checker from point X to point Y
+- `"play"` - Makes an automatic move
+
+### gnubg.command('move move_cmd')
+
+
+### gnubg.hint()
+Returns detailed move analysis including:
+- All possible moves with equity evaluations
+- Win probabilities for each move
+- Gammon probabilities
+- Move quality rankings
+
+Used by [`get_possible_moves()`](src/utils.py:179), [`get_hints()`](src/utils.py:193), and [`get_best_move()`](src/utils.py:207).
+
+### gnubg.posinfo()
+Returns position information including:
+- Current player turn (0 or 1)
+- Dice values
+- Game state information
+
+### gnubg.match()
+Returns comprehensive match information including:
+- Game history
+- Current game state
+- Winner information (when game ends)
+- Score tracking
+
+### Other gnubg Functions Used
+- **[`gnubg.pip()`](src/utils.py:43)** - Returns pip count (distance to finish) for each player
+- **[`gnubg.positionid()`](src/utils.py:50)** - Returns unique position identifier
+- **[`gnubg.evaluate()`](src/utils.py:36)** - Returns detailed position evaluation
 
 
 
