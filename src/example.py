@@ -19,13 +19,13 @@ def create_agent(agent_type):
 def main():
     # Get configuration from environment variables
     log_file_name = os.getenv('GAME_LOG_FILE', 'game')
-    log_folder_name = os.getenv('GAME_LOG_FOLDER', 'output')
+    log_folder_path = os.getenv('GAME_LOG_PATH', 'output')
     agent1_type = os.getenv('GAME_AGENT1', 'DebugAgent')
     agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
     debug_mode = os.getenv('GAME_DEBUG_MODE', 'true').lower() == 'true'
 
     # Initialize logger with custom parameters
-    logger = Logger(log_file=log_file_name, output_folder=log_folder_name, debug_mode=debug_mode)
+    logger = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
     
     try:
         agent0 = create_agent(agent1_type)

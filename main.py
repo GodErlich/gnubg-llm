@@ -4,12 +4,12 @@ import os
 import argparse
 import sys
 
-def run_silent_game(log_file_name, log_folder_name, agent1, agent2, debug_mode):
+def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode):
     """Run a single game silently and return winner"""
     # Set environment variables to pass parameters to the game
     env = os.environ.copy()
     env['GAME_LOG_FILE'] = log_file_name
-    env['GAME_LOG_FOLDER'] = log_folder_name
+    env['GAME_LOG_PATH'] = log_folder_path
     env['GAME_AGENT1'] = agent1
     env['GAME_AGENT2'] = agent2
     env['GAME_DEBUG_MODE'] = str(debug_mode).lower()
@@ -24,7 +24,7 @@ def run_silent_game(log_file_name, log_folder_name, agent1, agent2, debug_mode):
     # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
     return result.returncode
 
-def run_batch_games(num_games, log_file_name="game", log_folder_name="output", agent1="DebugAgent", agent2="RandomAgent", debug_mode=True):
+def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="DebugAgent", agent2="RandomAgent", debug_mode=True):
     """Run multiple games and show summary"""
     print(f"Running {num_games} games...")
     
@@ -35,7 +35,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_name="output", a
         if (i + 1) % 10 == 0:
             print(f"Progress: {i + 1}/{num_games}")
         
-        winner = run_silent_game(log_file_name, log_folder_name, agent1, agent2, debug_mode)
+        winner = run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode)
         if winner == 0:
             agent1_wins += 1
         elif winner == 1:
@@ -49,19 +49,19 @@ def run_batch_games(num_games, log_file_name="game", log_folder_name="output", a
 
 def main():
     parser = argparse.ArgumentParser(description='Run backgammon games with configurable agents')
-    parser.add_argument('--log_file_name', type=str, default='game',
+    parser.add_argument('--log_file_name', '--fn', type=str, default='game',
                         help='Name for the log file (default: game)')
-    parser.add_argument('--log_folder_name', type=str, default='output',
-                        help='Folder name for logs (default: output)')
-    parser.add_argument('--agent1', type=str, default='DebugAgent',
+    parser.add_argument('--log_folder_path', '--fp', type=str, default='output',
+                        help='Folder path for logs (default: output)')
+    parser.add_argument('--agent1', '--a1', type=str, default='DebugAgent',
                         choices=['DebugAgent', 'RandomAgent', 'LLMAgent', 'LiveCodeAgent'],
                         help='Agent type for player 1 (default: DebugAgent)')
-    parser.add_argument('--agent2', type=str, default='RandomAgent',
+    parser.add_argument('--agent2', '--a2', type=str, default='RandomAgent',
                         choices=['DebugAgent', 'RandomAgent', 'LLMAgent', 'LiveCodeAgent'],
                         help='Agent type for player 2 (default: RandomAgent)')
-    parser.add_argument('--number_of_games', type=int, default=1,
+    parser.add_argument('--number_of_games', '--n', type=int, default=1,
                         help='Number of games to play (default: 1)')
-    parser.add_argument('--debug_mode', action='store_true', default=True,
+    parser.add_argument('--debug_mode', '--d', action='store_true', default=True,
                         help='Enable debug mode for detailed logging (default: False)') #TODO: return debug mode to false
     
     args = parser.parse_args()
@@ -74,7 +74,7 @@ def main():
     run_batch_games(
         num_games=args.number_of_games,
         log_file_name=args.log_file_name,
-        log_folder_name=args.log_folder_name,
+        log_folder_path=args.log_folder_path,
         agent1=args.agent1,
         agent2=args.agent2,
         debug_mode=args.debug_mode
