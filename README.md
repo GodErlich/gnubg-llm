@@ -2,7 +2,6 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/demo.ipynb)
 [![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)
-[![Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml/badge.svg)](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)
 
 This code uses [gnubg module](https://www.gnu.org/software/gnubg/) to create backgammon "agents".
 
@@ -32,10 +31,6 @@ This code is an infrastructure for research.
 3. Wait for environment setup
 4. **Interactive Demo**: Open [`demo.ipynb`](demo.ipynb:1) for guided exploration
 5. Start experimenting!
-
-### Option 4: View Live Demos
-- **[Demo Workflow](https://github.com/GodErlich/gnubg-llm/actions/workflows/demo.yml)**: See automated test runs
-- Click **"Run workflow"** to trigger custom demos with your preferred settings
 
 ## Prerequisites for Local Setup:
 ### Windows OS
