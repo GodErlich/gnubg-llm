@@ -37,7 +37,7 @@ default_prompt = """
     Begin with a brief assessment of the position and what key objectives you see.
     
     Conclude with your recommended move in this exact format:
-    RECOMMENDED MOVE: [move notation as shown in the options]
+    RECOMMENDED MOVE: [best_move_here],
     """
 
 
@@ -60,7 +60,7 @@ class LLMAgent(Agent):
             chosen_move_data = consult_llm(board, prompt=self.defaultPrompt, system_prompt=self.system_prompt, possible_moves=possible_moves, hints=hints, best_move=best_move)
 
             if chosen_move_data:
-                chosen_move = chosen_move_data["move"]
+                chosen_move = chosen_move_data
                 logger.debug(f"Playing LLM-recommended move: {chosen_move}")
                 return chosen_move
 

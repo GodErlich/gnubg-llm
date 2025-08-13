@@ -1,8 +1,10 @@
 import gnubg
 import os
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple,Dict, Any
 import re
 import random
+import json
+
 
 import requests
 from dotenv import load_dotenv
@@ -248,73 +250,8 @@ def random_valid_move():
     return all_moves[0]
 
 
-# def default_prompt(board_repr=None):
-#     # Extract the list of moves from the hint data
-#     if not board_repr:
-#         board_repr = default_board_representation()
-#     hint_data = gnubg.hint()
-#     moves = hint_data["hint"]
-
-#     formatted_moves = []
-#     for move_info in moves:
-#         move_desc = f"Move {move_info['movenum']}: {move_info['move']}"
-
-#         probs = move_info["details"]["probs"]
-#         win_prob = probs[0] * 100
-#         gammon_win = probs[1] * 100
-
-#         eval_desc = (
-#             f"Win: {win_prob:.1f}%, Gammon win: {gammon_win:.1f}%, "
-#         )
-
-#         formatted_moves.append(f"{move_desc}\n{eval_desc}")
-
-#     moves_text = "\n\n".join(formatted_moves)
-
-#     prompt = f"""
-#     You are an expert backgammon player choosing the best move in this position.
-#     You have never lost against gnubg because of your superior strategy.
-    
-#     # Current Board Position
-#     {board_repr}
-    
-#     # Possible Moves (with gnubg evaluations)
-#     {moves_text}
-    
-#     # Instructions
-#     Choose the best move for this position, drawing on both:
-#     1. Your knowledge of backgammon strategy and tactical patterns
-#     2. The statistical evaluations from gnubg (shown above)
-    
-#     Consider these factors that might not be fully captured in gnubg's evaluation:
-#     - Position type (racing, priming, back game, holding game)
-#     - Tactical patterns (slots, hits, anchors, builders)
-#     - Checker distribution and flexibility
-#     - Safety vs. aggression balance
-#     - Future roll equity
-    
-#     Your analysis should:
-#     1. Discuss the best move according to your superior knowledge of backgammon.
-#     2. Identify any strategic patterns or special features of this position
-#     3. Explain whether you agree or disagree with gnubg's evaluation and why
-    
-#     Remember that negative equity values mean the position is disadvantageous for the player.
-#     Lower (more negative) values indicate worse moves in this context.
-    
-#     Begin with a brief assessment of the position and what key objectives you see.
-    
-#     Conclude with your recommended move in this exact format:
-#     RECOMMENDED MOVE: [move notation as shown in the options]
-#     """
-
-#     return prompt
-
-
-def extract_move_from_llm_response(response, possible_moves):
-    """Extract the recommended move from the LLM response"""
-    # TODO: make sure extract move from llm transform the reposnse to a move that gnubg can understand.
-    # if not pass it to openai api again, with instructions to return a move that gnubg can understand.
-
+def extract_response_from_llm(response, possible_moves=None, schema=None):
+    """Extract the response from the LLM based on schema or fallback to move extraction"""
     try:
         if not response or "choices" not in response:
             return None
@@ -322,64 +259,178 @@ def extract_move_from_llm_response(response, possible_moves):
         content = response["choices"][0]["message"]["content"]
         logger.debug(f"LLM response: {content}")
 
-        # Look for a section that might contain the recommended move
-        # This is a simple extraction approach - can be refined based on actual responses
-
-        # Look for specific markers
-        markers = [
-            "RECOMMENDED MOVE:",
-            "RECOMMENDED_MOVE:",
-            "I recommend:",
-            "Best move:",
-            "Optimal move:",
-            "My recommendation:",
-        ]
-
-        for marker in markers:
-            if marker in content:
-                # Split by the marker and take the text immediately after
-                parts = content.split(marker)
-                if len(parts) > 1:
-                    # Take the first line after the marker
-                    recommendation = parts[1].strip().split("\n")[0].strip()
-
-                    # Clean up the recommendation (remove punctuation, etc.)
-                    for char in [".", ",", ":", ";", '"', "'"]:
-                        recommendation = recommendation.replace(char, "")
-
-                    recommendation = recommendation.strip()
-                    logger.debug(f"Extracted move: '{recommendation}'")
-
-                    # Try to match with available moves
-                    for move in possible_moves:
-                        if move["move"] == recommendation:
-                            return move
-
-                    # Try partial matching
-                    for move in possible_moves:
-                        if (
-                            recommendation in move["move"]
-                            or move["move"] in recommendation
-                        ):
-                            return move
-
-        # If we couldn't find a clear recommendation, try to find any move notation in the text
-        for move in possible_moves:
-            if move["move"] in content:
-                logger.debug(f"Found move match in content: {move['move']}")
-                return move
-
-        # No clear recommendation found
-        logger.warning("No clear move recommendation found in response")
-        return None
+        # If schema is provided, try to parse as JSON first
+        if schema:
+            return extract_with_schema(content, schema, possible_moves)
+        
+        # Fallback to original move extraction logic
+        return extract_move_from_content(content, possible_moves)
+        
     except Exception as e:
-        logger.error(f"Error extracting move from response: {e}")
+        logger.error(f"Error extracting response: {e}")
         return None
 
-def consult_llm(board_repr:str, prompt: str, system_prompt: str =None,
+
+def extract_with_schema(content: str, schema: Dict[str, Any], possible_moves=None):
+    """Extract response using provided schema"""
+    try:
+        # Try to find JSON in the response
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        if json_match:
+            json_str = json_match.group()
+            try:
+                parsed_response = json.loads(json_str)
+                
+                # Validate that the response matches the schema structure
+                if validate_schema_response(parsed_response, schema):
+                    # If there's a move field and possible_moves, validate the move
+                    move_fields = [key for key in schema.keys() if 'move' in key.lower()]
+                    if move_fields and possible_moves:
+                        for field in move_fields:
+                            if field in parsed_response:
+                                move_value = parsed_response[field]
+                                validated_move = validate_move(move_value, possible_moves)
+                                if validated_move:
+                                    parsed_response[field] = validated_move['move']
+                                    parsed_response['_validated_move'] = validated_move
+                                break
+                    
+                    return parsed_response
+                else:
+                    logger.warning("Response doesn't match expected schema structure")
+                    
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse JSON: {e}")
+        
+        # If JSON parsing failed, try to extract values using schema field names
+        return extract_fields_from_text(content, schema, possible_moves)
+        
+    except Exception as e:
+        logger.error(f"Error in schema extraction: {e}")
+        return None
+
+
+def validate_schema_response(response: Dict, schema: Dict) -> bool:
+    """Validate that response contains expected fields from schema"""
+    schema_keys = set(schema.keys())
+    response_keys = set(response.keys())
+    
+    # Check if at least some of the expected fields are present
+    return len(schema_keys.intersection(response_keys)) > 0
+
+
+def extract_fields_from_text(content: str, schema: Dict, possible_moves=None) -> Dict:
+    """Extract fields from text when JSON parsing fails"""
+    result = {}
+    
+    for field_name, field_type in schema.items():
+        # Look for field name in content
+        patterns = [
+            f"{field_name}:\\s*(.+?)(?:\\n|$)",
+            f"{field_name.replace('_', ' ')}:\\s*(.+?)(?:\\n|$)",
+            f"{field_name.upper()}:\\s*(.+?)(?:\\n|$)",
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, content, re.IGNORECASE)
+            if match:
+                value = match.group(1).strip()
+                # Clean up the value
+                for char in [".", ",", ":", ";", '"', "'"]:
+                    value = value.replace(char, "")
+                value = value.strip()
+                
+                # If this looks like a move field, validate it
+                if 'move' in field_name.lower() and possible_moves:
+                    validated_move = validate_move(value, possible_moves)
+                    if validated_move:
+                        result[field_name] = validated_move['move']
+                        result['_validated_move'] = validated_move
+                    else:
+                        result[field_name] = value
+                else:
+                    result[field_name] = value
+                break
+    
+    return result if result else None
+
+
+def validate_move(move_text: str, possible_moves: List[Dict]) -> Optional[Dict]:
+    """Validate and find the best matching move"""
+    if not possible_moves:
+        return None
+        
+    # Exact match
+    for move in possible_moves:
+        if move == move_text:
+            return move
+    
+    # Partial matching
+    for move in possible_moves:
+        if move_text in move or move in move_text:
+            return move
+            
+    return None
+
+
+def extract_move_from_content(content: str, possible_moves: List[Dict]) -> Optional[Dict]:
+    """Original move extraction logic for backward compatibility"""
+    # Look for specific markers
+    markers = [
+        "RECOMMENDED MOVE:",
+        "RECOMMENDED_MOVE:",
+        "**RECOMMENDED MOVE**"
+        "I recommend:",
+        "Best move:",
+        "Optimal move:",
+        "My recommendation:",
+    ]
+
+    for marker in markers:
+        if marker in content:
+            # Split by the marker and take the text immediately after
+            parts = content.split(marker)
+            if len(parts) > 1:
+                # Take the first line after the marker
+                recommendation = parts[1].strip().split("\n")[0].strip()
+
+                # Clean up the recommendation (remove punctuation, etc.)
+                for char in [".", ",", ":", ";", '"', "'"]:
+                    recommendation = recommendation.replace(char, "")
+
+                recommendation = recommendation.strip()
+                logger.debug(f"Extracted move: '{recommendation}'")
+
+                # Try to match with available moves
+                validated_move = validate_move(recommendation, possible_moves)
+                logger.debug(f"Validated move: {validated_move}")
+                if validated_move:
+                    return validated_move
+
+    # If we couldn't find a clear recommendation, try to find any move notation in the text
+    for move in possible_moves:
+        if move["move"] in content:
+            logger.debug(f"Found move match in content: {move['move']}")
+            return move
+
+    # No clear recommendation found
+    logger.warning("No clear move recommendation found in response")
+    return None
+
+
+def consult_llm(board_repr: str, prompt: str, system_prompt: str = None,
                 possible_moves: List[str] = [], hints: List[Hint] = [],
-                best_move: str = '', **prompt_params):
-    """Send game state to LLM and get move recommendation
+                best_move: str = '', schema: Dict[str, Any] = None, **prompt_params):
+    """Send game state to LLM and get response based on schema or move recommendation
+    
+    Args:
+        board_repr: String representation of the board
+        prompt: The prompt template to send to LLM
+        system_prompt: Optional system prompt
+        possible_moves: List of possible moves
+        hints: List of hints
+        best_move: Best move if known
+        schema: Optional schema defining expected response format
         **prompt_params: Additional parameters to inject into the prompt
     """
     try:
@@ -395,26 +446,32 @@ def consult_llm(board_repr:str, prompt: str, system_prompt: str =None,
             **prompt_params
         }
         
-        prompt = prompt.format(**prompt_params)
+        # If schema is provided, add it to the prompt
+        if schema:
+            prompt_params["schema"] = json.dumps(schema, indent=2)
         
-        llm_response = call_openai_api(prompt, system_prompt=system_prompt)
+        formatted_prompt = prompt.format(**prompt_params)
+        
+        llm_response = call_openai_api(formatted_prompt, system_prompt=system_prompt)
 
-        # TODO: validate the response using schema
+        # Extract response using schema or fallback to move extraction
+        result = extract_response_from_llm(llm_response, possible_moves, schema)
 
-        move_choice = extract_move_from_llm_response(llm_response, possible_moves)
+        if result:
+            if schema:
+                logger.debug(f"LLM response with schema: {result}")
+            else:
+                logger.debug(f"LLM recommended move: {result}")
+            return result
 
-        if move_choice:
-            logger.debug(f"LLM recommended move: {move_choice['move']}")
-            return move_choice
-
-        logger.warning("LLM did not recommend a valid move.")
+        logger.warning("LLM did not provide a valid response.")
         return None
+        
     except Exception as e:
         logger.error(f"Error consulting LLM: {e}")
         import traceback
-
         logger.error(traceback.format_exc())
-        logger.warning("LLM did not recommend a valid move.")
+        logger.warning("LLM did not provide a valid response.")
         return None
 
 
