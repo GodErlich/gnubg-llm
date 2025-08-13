@@ -1,6 +1,5 @@
 from .base import Agent
 from ..interfaces import AgentInputConfig, AgentInput
-from ..utils import random_move
 from ..logger import logger
 
 
