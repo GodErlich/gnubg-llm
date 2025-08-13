@@ -64,8 +64,8 @@ def main():
                         help='Agent type for player 2 (default: RandomAgent)')
     parser.add_argument('--number_of_games', '--n', type=int, default=1,
                         help='Number of games to play (default: 1)')
-    parser.add_argument('--debug_mode', '--d', action='store_true', default=True,
-                        help='Enable debug mode for detailed logging (default: False)') #TODO: return debug mode to false
+    parser.add_argument('--debug_mode', '--d', action='store_true', default=False,
+                        help='Enable debug mode for detailed logging (default: False)')
     
     # Agent input configuration arguments
     parser.add_argument('--possible_moves', '--pm', action='store_true', default=False,
