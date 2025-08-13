@@ -262,10 +262,9 @@ def extract_response_from_llm(response, possible_moves=None, schema=None):
         # If schema is provided, try to parse as JSON first
         if schema:
             return extract_with_schema(content, schema, possible_moves)
-        
-        # Fallback to original move extraction logic
-        return extract_move_from_content(content, possible_moves)
-        
+        else:
+            return content.strip()
+                
     except Exception as e:
         logger.error(f"Error extracting response: {e}")
         return None
@@ -296,33 +295,7 @@ def extract_with_schema(content: str, schema: Dict[str, Any], possible_moves=Non
                     continue
         
         if parsed_response:
-            # Validate that the response matches the schema structure
-            if validate_schema_response(parsed_response, schema):
-                # If there's a move field and possible_moves, validate the move
-                move_fields = [key for key in schema.keys() if 'move' in key.lower()]
-                logger.debug(f"Found move fields: {move_fields}")
-                
-                if move_fields and possible_moves:
-                    for field in move_fields:
-                        if field in parsed_response:
-                            move_value = parsed_response[field]
-                            logger.debug(f"Validating move value: '{move_value}'")
-                            validated_move = validate_move(move_value, possible_moves)
-                            logger.debug(f"Validated move result: {validated_move}")
-                            
-                            if validated_move:
-                                # Ensure validated_move is a dict before accessing ['move']
-                                if isinstance(validated_move, dict) and 'move' in validated_move:
-                                    parsed_response[field] = validated_move['move']
-                                    parsed_response['_validated_move'] = validated_move
-                                elif isinstance(validated_move, str):
-                                    # If validated_move is just a string, use it directly
-                                    parsed_response[field] = validated_move
-                                    parsed_response['_validated_move'] = {"move": validated_move}
-                                else:
-                                    logger.warning(f"Unexpected validated_move type: {type(validated_move)}")
-                            break
-                
+            if validate_schema_response(parsed_response, schema):                
                 return parsed_response
             else:
                 logger.warning("Response doesn't match expected schema structure")
@@ -368,90 +341,11 @@ def extract_fields_from_text(content: str, schema: Dict, possible_moves=None) ->
                     value = value.replace(char, "")
                 value = value.strip()
                 
-                # If this looks like a move field, validate it
-                if 'move' in field_name.lower() and possible_moves:
-                    validated_move = validate_move(value, possible_moves)
-                    if validated_move:
-                        result[field_name] = validated_move['move']
-                        result['_validated_move'] = validated_move
-                    else:
-                        result[field_name] = value
-                else:
-                    result[field_name] = value
+                result[field_name] = value
                 break
     
     return result if result else None
 
-
-def validate_move(move_text: str, possible_moves: List) -> Optional:
-    """Validate and find the best matching move"""
-    if not possible_moves:
-        return None
-    
-    # Handle both list of strings and list of dicts
-    def get_move_string(move_item):
-        if isinstance(move_item, dict):
-            return move_item.get("move", str(move_item))
-        return str(move_item)
-    
-    # Exact match
-    for move in possible_moves:
-        move_str = get_move_string(move)
-        if move_str == move_text:
-            return move if isinstance(move, dict) else {"move": move}
-    
-    # Partial matching
-    for move in possible_moves:
-        move_str = get_move_string(move)
-        if move_text in move_str or move_str in move_text:
-            return move if isinstance(move, dict) else {"move": move}
-            
-    return None
-
-
-def extract_move_from_content(content: str, possible_moves: List) -> Optional:
-    """Original move extraction logic for backward compatibility"""
-    # Look for specific markers
-    markers = [
-        "RECOMMENDED MOVE:",
-        "RECOMMENDED_MOVE:",
-        "**RECOMMENDED MOVE**"
-        "I recommend:",
-        "Best move:",
-        "Optimal move:",
-        "My recommendation:",
-    ]
-
-    for marker in markers:
-        if marker in content:
-            # Split by the marker and take the text immediately after
-            parts = content.split(marker)
-            if len(parts) > 1:
-                # Take the first line after the marker
-                recommendation = parts[1].strip().split("\n")[0].strip()
-
-                # Clean up the recommendation (remove punctuation, etc.)
-                for char in [".", ",", ":", ";", '"', "'"]:
-                    recommendation = recommendation.replace(char, "")
-
-                recommendation = recommendation.strip()
-                logger.debug(f"Extracted move: '{recommendation}'")
-
-                # Try to match with available moves
-                validated_move = validate_move(recommendation, possible_moves)
-                if validated_move:
-                    return validated_move
-
-    # If we couldn't find a clear recommendation, try to find any move notation in the text
-    for move in possible_moves:
-        move_str = move.get("move", str(move)) if isinstance(move, dict) else str(move)
-        if move_str in content:
-            logger.debug(f"Found move match in content: {move_str}")
-            return move if isinstance(move, dict) else {"move": move}
-
-    # No clear recommendation found
-    logger.warning("No clear move recommendation found in response")
-    return None
 
 
 def consult_llm(board_repr: str, prompt: str, system_prompt: str = None,
@@ -491,34 +385,8 @@ def consult_llm(board_repr: str, prompt: str, system_prompt: str = None,
         result = extract_response_from_llm(llm_response, possible_moves, schema)
 
         if result:
-            if schema:
-                logger.debug(f"LLM response with schema: {result}")
-                # For schema responses, find the move field and return it as a string
-                move_fields = [key for key in schema.keys() if 'move' in key.lower()]
-                if move_fields:
-                    for field in move_fields:
-                        if field in result and result[field]:
-                            move_str = str(result[field]).strip()
-                            logger.debug(f"Returning move string: '{move_str}'")
-                            return move_str
-                # If no move field found, return the first string value
-                for value in result.values():
-                    if isinstance(value, str) and value.strip():
-                        return value.strip()
-                return None
-            else:
-                # For backward compatibility, return move string
-                if isinstance(result, dict) and 'move' in result:
-                    move_str = str(result['move']).strip()
-                    logger.debug(f"LLM recommended move: {move_str}")
-                    return move_str
-                elif isinstance(result, str):
-                    logger.debug(f"LLM recommended move: {result}")
-                    return result.strip()
-                else:
-                    logger.debug(f"LLM recommended move: {result}")
-                    return str(result).strip() if result else None
-
+            logger.debug(f"LLM response extracted: {result}")
+            return result
         logger.warning("LLM did not provide a valid response.")
         return None
         

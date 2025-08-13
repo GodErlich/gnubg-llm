@@ -59,11 +59,11 @@ class LLMAgent(Agent):
                 "best_move": "str",
             }
             prompt_with_schema = self.defaultPrompt + "\n\nReturn as JSON with schema: {schema}"
-            chosen_move_data = consult_llm(board, prompt=prompt_with_schema, system_prompt=self.system_prompt,
+            llm_response = consult_llm(board, prompt=prompt_with_schema, system_prompt=self.system_prompt,
                                            possible_moves=possible_moves, hints=hints, best_move=best_move, schema=answer_schema)
 
-            if chosen_move_data:
-                chosen_move = chosen_move_data
+            if llm_response:
+                chosen_move = llm_response.get("best_move", None)
                 logger.debug(f"Playing LLM-recommended move: {chosen_move}")
                 return chosen_move
 
