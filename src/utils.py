@@ -1,4 +1,3 @@
-from agents.base import Agent
 import gnubg
 import os
 from typing import List, Optional, Tuple
@@ -16,47 +15,6 @@ load_dotenv()
 LLM_API_URL = os.getenv("LLM_API_URL")
 LLM_API_KEY = os.getenv("LLM_API_KEY")
 
-def get_game_context():
-    """Get the current game context including position evaluation"""
-    context = {}
-
-    try:
-        # Get current dice
-        match_info = gnubg.match()
-        games = match_info.get("games", [])
-        if games and len(games) > 0:
-            latest_game = games[-1]
-            game_actions = latest_game.get("game", [])
-            if game_actions and len(game_actions) > 0:
-                latest_action = game_actions[-1]
-                context["dice"] = latest_action.get("dice", None)
-                context["player"] = latest_action.get("player", None)
-
-        # Get position evaluation if available
-        try:
-            evaluation = gnubg.evaluate()
-            context["evaluation"] = evaluation
-        except:
-            pass
-
-        # Get pip count (distance to finish)
-        try:
-            pip_count = gnubg.pip()
-            context["pip_count"] = pip_count
-        except:
-            pass
-
-        # Get position ID for reference
-        try:
-            context["position_id"] = gnubg.positionid()
-        except:
-            pass
-
-        return context
-    except Exception as e:
-        logger.error(f"Error getting game context: {e}")
-        return {}
-
 def get_player_name() -> str:
     """Get the name of the current player."""
     posinfo = gnubg.posinfo()
@@ -70,6 +28,7 @@ def get_dice() -> Tuple[int, int]:
     if dice is None or len(dice) < 2:
         logger.warning("No dice rolled yet.")
         return None
+    return dice
 
 def reverse_board(board: Tuple[int, int]) -> Tuple[int, int]:
     """Reverse the board tuple to match the player's perspective. only reverses the first 24 positions, bar is not reversed."""
@@ -159,7 +118,7 @@ def is_valid_move(move: str) -> bool:
         logger.warning(f"Invalid move format: {move}")
         return False
     
-def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
+def move_piece(curr_player, move: Optional[str] = None) -> bool:
     """Move a piece according to the move string."""
     if not move:
         logger.warning(f"Agent {curr_player} did not choose a valid move. an automatic move will be played.")
