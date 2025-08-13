@@ -248,66 +248,66 @@ def random_valid_move():
     return all_moves[0]
 
 
-def default_prompt(board_repr=None):
-    # Extract the list of moves from the hint data
-    if not board_repr:
-        board_repr = default_board_representation()
-    hint_data = gnubg.hint()
-    moves = hint_data["hint"]
+# def default_prompt(board_repr=None):
+#     # Extract the list of moves from the hint data
+#     if not board_repr:
+#         board_repr = default_board_representation()
+#     hint_data = gnubg.hint()
+#     moves = hint_data["hint"]
 
-    formatted_moves = []
-    for move_info in moves:
-        move_desc = f"Move {move_info['movenum']}: {move_info['move']}"
+#     formatted_moves = []
+#     for move_info in moves:
+#         move_desc = f"Move {move_info['movenum']}: {move_info['move']}"
 
-        probs = move_info["details"]["probs"]
-        win_prob = probs[0] * 100
-        gammon_win = probs[1] * 100
+#         probs = move_info["details"]["probs"]
+#         win_prob = probs[0] * 100
+#         gammon_win = probs[1] * 100
 
-        eval_desc = (
-            f"Win: {win_prob:.1f}%, Gammon win: {gammon_win:.1f}%, "
-        )
+#         eval_desc = (
+#             f"Win: {win_prob:.1f}%, Gammon win: {gammon_win:.1f}%, "
+#         )
 
-        formatted_moves.append(f"{move_desc}\n{eval_desc}")
+#         formatted_moves.append(f"{move_desc}\n{eval_desc}")
 
-    moves_text = "\n\n".join(formatted_moves)
+#     moves_text = "\n\n".join(formatted_moves)
 
-    prompt = f"""
-    You are an expert backgammon player choosing the best move in this position.
-    You have never lost against gnubg because of your superior strategy.
+#     prompt = f"""
+#     You are an expert backgammon player choosing the best move in this position.
+#     You have never lost against gnubg because of your superior strategy.
     
-    # Current Board Position
-    {board_repr}
+#     # Current Board Position
+#     {board_repr}
     
-    # Possible Moves (with gnubg evaluations)
-    {moves_text}
+#     # Possible Moves (with gnubg evaluations)
+#     {moves_text}
     
-    # Instructions
-    Choose the best move for this position, drawing on both:
-    1. Your knowledge of backgammon strategy and tactical patterns
-    2. The statistical evaluations from gnubg (shown above)
+#     # Instructions
+#     Choose the best move for this position, drawing on both:
+#     1. Your knowledge of backgammon strategy and tactical patterns
+#     2. The statistical evaluations from gnubg (shown above)
     
-    Consider these factors that might not be fully captured in gnubg's evaluation:
-    - Position type (racing, priming, back game, holding game)
-    - Tactical patterns (slots, hits, anchors, builders)
-    - Checker distribution and flexibility
-    - Safety vs. aggression balance
-    - Future roll equity
+#     Consider these factors that might not be fully captured in gnubg's evaluation:
+#     - Position type (racing, priming, back game, holding game)
+#     - Tactical patterns (slots, hits, anchors, builders)
+#     - Checker distribution and flexibility
+#     - Safety vs. aggression balance
+#     - Future roll equity
     
-    Your analysis should:
-    1. Discuss the best move according to your superior knowledge of backgammon.
-    2. Identify any strategic patterns or special features of this position
-    3. Explain whether you agree or disagree with gnubg's evaluation and why
+#     Your analysis should:
+#     1. Discuss the best move according to your superior knowledge of backgammon.
+#     2. Identify any strategic patterns or special features of this position
+#     3. Explain whether you agree or disagree with gnubg's evaluation and why
     
-    Remember that negative equity values mean the position is disadvantageous for the player.
-    Lower (more negative) values indicate worse moves in this context.
+#     Remember that negative equity values mean the position is disadvantageous for the player.
+#     Lower (more negative) values indicate worse moves in this context.
     
-    Begin with a brief assessment of the position and what key objectives you see.
+#     Begin with a brief assessment of the position and what key objectives you see.
     
-    Conclude with your recommended move in this exact format:
-    RECOMMENDED MOVE: [move notation as shown in the options]
-    """
+#     Conclude with your recommended move in this exact format:
+#     RECOMMENDED MOVE: [move notation as shown in the options]
+#     """
 
-    return prompt
+#     return prompt
 
 
 def extract_move_from_llm_response(response, possible_moves):

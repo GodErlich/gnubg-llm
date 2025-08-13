@@ -41,13 +41,13 @@ def main():
     logger = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
     
     try:
-        agent0 = create_agent(agent1_type, inputs=agent_inputs)
-        agent1 = create_agent(agent2_type, inputs=agent_inputs)
+        agent1 = create_agent(agent1_type, inputs=agent_inputs)
+        agent2 = create_agent(agent2_type, inputs=agent_inputs)
     except ValueError as e:
         logger.error(f"Error creating agents: {e}")
         return None
 
-    game = Game(agent0, agent1)
+    game = Game(agent1, agent2)
 
     # Play the game
     result = game.play()
