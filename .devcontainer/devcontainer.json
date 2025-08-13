@@ -12,6 +12,11 @@
   },
   "runArgs": ["--init"],
   "postCreateCommand": "bash .devcontainer/setup.sh",
+  "containerEnv": {
+    "PULSE_RUNTIME_PATH": "/tmp/pulse-runtime",
+    "ALSA_PCM_CARD": "default",
+    "ALSA_PCM_DEVICE": "0"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -29,7 +34,13 @@
         "python.linting.enabled": true,
         "python.linting.pylintEnabled": true,
         "python.formatting.provider": "black",
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.env.linux": {
+          "PULSE_RUNTIME_PATH": "/tmp/pulse-runtime",
+          "ALSA_PCM_CARD": "default",
+          "ALSA_PCM_DEVICE": "0",
+          "PATH": "/usr/games:${env:PATH}"
+        }
       }
     }
   },

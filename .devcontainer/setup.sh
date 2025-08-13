@@ -20,7 +20,17 @@ sudo apt-get install -y \
     wget \
     gnubg \
     make \
-    build-essential
+    build-essential \
+    pulseaudio \
+    alsa-utils
+
+# Configure audio to prevent ALSA warnings
+echo "🔇 Configuring audio to prevent ALSA warnings..."
+sudo mkdir -p /etc/pulse
+echo "load-module module-null-sink sink_name=DummyOutput sink_properties=device.description=\"Dummy_Output\"" | sudo tee /etc/pulse/default.pa > /dev/null
+export PULSE_RUNTIME_PATH=/tmp/pulse-runtime
+export ALSA_PCM_CARD=default
+export ALSA_PCM_DEVICE=0
 
 # Install Python dependencies to user directory first
 echo "🐍 Installing Python dependencies..."
@@ -70,9 +80,24 @@ echo "4️⃣ Force reinstall..."
 sudo pip install --force-reinstall --no-deps requests || true
 sudo pip install --force-reinstall --no-deps python-dotenv || true
 
-# Test installation
+# Configure GNU Backgammon to use the correct Python
+echo "🐍 Configuring GNU Backgammon Python integration..."
+PYTHON_PATH=$(which python3)
+echo "Python path: $PYTHON_PATH"
+
+# Create a gnubg configuration to suppress audio warnings
+mkdir -p ~/.gnubg
+cat > ~/.gnubg/gnubgrc << EOF
+# GNU Backgammon configuration
+set display inhibit off
+set sound enable off
+set python command $PYTHON_PATH
+EOF
+
+# Test installation with audio suppressed
 echo "🧪 Testing GNU Backgammon installation..."
-if gnubg --version > /dev/null 2>&1; then
+export PULSE_RUNTIME_PATH=/tmp/pulse-runtime
+if gnubg --version 2>/dev/null > /dev/null; then
     echo "✅ GNU Backgammon test passed"
 else
     echo "❌ GNU Backgammon installation failed!"
