@@ -8,7 +8,7 @@ def create_agent(agent_type):
     if agent_type == "BestMoveAgent":
         return BestMoveAgent(inputs={"best_move": True})
     elif agent_type == "RandomAgent":
-        return RandomAgent()
+        return RandomAgent(inputs={"possible_moves": True})
     elif agent_type == "LLMAgent":
         return LLMAgent()
     elif agent_type == "LiveCodeAgent":
