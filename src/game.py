@@ -3,7 +3,7 @@ import gnubg
 import time
 
 from .agents import Agent
-from .utils import get_dice, get_simple_board, get_possible_moves, random_move, move_piece, roll_dice, get_hints, get_best_move, map_winner
+from .utils import get_dice, get_simple_board, get_possible_moves, move_piece, roll_dice, get_hints, get_best_move, map_winner
 from .logger import logger
 
 class Game:
@@ -59,14 +59,7 @@ class Game:
             else:
                 extra_input = self.agent2.filter_inputs(possible_moves, hints, best_move)
                 move = self.agent2.choose_move(board, extra_input)
-            if move:
-                move_piece(move)
-                logger.debug(f"Player {curr_player} moved: {move}")
-            else:
-                logger.warning(f"Agent {curr_player} did not choose a valid move. an automatic move will be played.")
-                move = random_move()
-                move_piece(move)
-
+            move_piece(curr_player, move)
             time.sleep(1)
 
         # Return winner info

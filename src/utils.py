@@ -1,3 +1,4 @@
+from agents.base import Agent
 import gnubg
 import os
 from typing import List, Optional, Tuple
@@ -158,22 +159,26 @@ def is_valid_move(move: str) -> bool:
         logger.warning(f"Invalid move format: {move}")
         return False
     
-def move_piece(move: str):
+def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
     """Move a piece according to the move string."""
     if not move:
-        gnubg.command("play")
-        return False
+        logger.warning(f"Agent {curr_player} did not choose a valid move. an automatic move will be played.")
+        move = random_valid_move()
+        if not move:
+            logger.warning("No valid move found, forcing gnubg to play.")
+            gnubg.command("play")
+            return False
     # TODO: fix is valid move and then uncomment this
     # if not is_valid_move(move):
     #     logger.warning("Invalid move format. Move must be a non-empty string.")
     #     return False
     try:
         gnubg.command(f"move {move}")
+        return True
     except Exception as e:
         logger.error(f"Error moving piece, forcing gnubg to play: {e}")
         gnubg.command("play")
         return False
-    return True
    
 
 def get_possible_moves() -> List[str]:
@@ -217,7 +222,7 @@ def get_best_move() -> str:
         logger.error(f"Error with findbestmove: {e}")
         return None
 
-def random_move():
+def random_valid_move():
     """ makes a valid random move"""
     all_moves =  get_possible_moves()
     if not all_moves or len(all_moves) == 0:
@@ -385,14 +390,15 @@ def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
             logger.debug(f"LLM recommended move: {move_choice['move']}")
             return move_choice
 
-        return random_move()
+        logger.warning("LLM did not recommend a valid move.")
+        return None
     except Exception as e:
         logger.error(f"Error consulting LLM: {e}")
         import traceback
 
         logger.error(traceback.format_exc())
-
-        return random_move()
+        logger.warning("LLM did not recommend a valid move.")
+        return None
 
 
 def call_openai_api(prompt, system_prompt=None):
