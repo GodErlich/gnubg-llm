@@ -252,6 +252,39 @@ If you want to add a new agent with different behavior, add a new file called "y
 In this file create an Agent class (for reference look into random_agent.py), lastly customize the
 function choose_move as you wish.
 
+## Custom Board Representation
+
+The [`Game`](src/game.py:9) class supports custom board representation functions that can be passed during initialization. This allows teams to customize how the board state is displayed to their agents.
+
+### How to Use Custom Board Representation
+
+1. **Create a custom function** that takes no arguments and returns a string:
+   ```python
+   def my_custom_board_representation() -> str:
+       # Your custom logic here
+       board = get_simple_board()  # Get raw board data
+       # Format the board as needed for your agent
+       return f"Custom board format: {board}"
+   ```
+
+2. **Pass it to the Game class** during initialization, in file game_orchestrator:
+   ```python
+   game = Game(
+       agent1=agent1,
+       agent2=agent2,
+       board_representation=my_custom_board_representation
+   )
+   ```
+   
+3. **Type hint specification**: The `board_representation` parameter accepts any function with the signature `Callable[[], str]` - meaning it takes no arguments and returns a string.
+
+### Default Board Representation
+
+If no custom function is provided, the game uses [`default_board_representation()`](src/utils.py:123) which provides a board of the format:
+Backgammon board state:	1: O has 1	2: empty	3: O has 1	4: empty	5: empty	6: X has 5	7: empty	8: X has 3	9: empty	10: empty	11: empty	12: O has 4	13: X has 5	14: empty	15: empty	16: empty	17: O has 4	18: empty	19: O has 5	20: empty	21: empty	22: empty	23: empty	24: X has 2	Bar: X has 0, O has 0
+
+This flexibility allows research teams to experiment with different board representations to see how they affect agent performance and decision-making.
+
 ## Features: 
 
 ### Run the game in batches

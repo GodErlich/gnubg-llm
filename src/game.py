@@ -1,5 +1,6 @@
 import gnubg
 import time
+from typing import Callable
 
 from .agents import Agent
 from .utils import default_board_representation, get_dice, get_simple_board, get_possible_moves, move_piece, roll_dice, get_hints, get_best_move, map_winner, is_cube_decision, handle_cube_decision
@@ -7,7 +8,7 @@ from .logger import logger
 
 class Game:
     """Manages a backgammon game between two agents."""
-    def __init__(self, agent1: Agent, agent2: Agent, max_turns=200, board_representation=None):
+    def __init__(self, agent1: Agent, agent2: Agent, max_turns: int = 1000, board_representation: Callable[[], str] = None):
         self.agent1 = agent1
         self.agent2 = agent2
         self.max_turns = max_turns
