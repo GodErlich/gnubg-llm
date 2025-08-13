@@ -8,7 +8,7 @@ from .logger import logger
 
 class Game:
     """Manages a backgammon game between two agents."""
-    def __init__(self, agent1: Agent, agent2: Agent, max_turns: int = 1000, board_representation: Callable[[], str] = None):
+    def __init__(self, agent1: Agent, agent2: Agent, max_turns: int = 200, board_representation: Callable[[], str] = None):
         self.agent1 = agent1
         self.agent2 = agent2
         self.max_turns = max_turns
@@ -20,16 +20,46 @@ class Game:
         board = get_simple_board()
         player1_checkers = sum(board[0])
         player2_checkers = sum(board[1])
+        
+        # Check if someone bore off all pieces
         if player1_checkers == 0 or player2_checkers == 0:
             return True
+        
         match_info = gnubg.match()
+        
+        # Check match-level result (more reliable)
+        match_result = match_info.get("match-info", {}).get("result", 0)
+        if match_result != 0:  # -1 or 1 indicates someone won
+            return True
+        
+        # Also check game-level winner as backup
         if "games" in match_info and match_info["games"]:
             latest_game = match_info["games"][-1]
             if "info" in latest_game and "winner" in latest_game["info"]:
                 if latest_game["info"]["winner"] is not None:
                     return True
+                    
         return False
     
+    def __find_winner(self):
+        """Find and return the winner of the completed game."""
+        match_info = gnubg.match()
+        logger.info(f"Game ended after {self.turn_count} turns.")
+        logger.debug(f"Match info: {match_info}")
+        
+        # Check match-level result first (more reliable)
+        game_result = match_info.get("games", {})[0] if match_info.get("games") else {}
+        winner = game_result.get("info")
+        winner_str = winner.get("winner") if winner else None
+        if winner_str is not None:
+            winner_index = map_winner(winner_str)
+            winner_agent = self.agent1 if winner_index == 0 else self.agent2
+            logger.info(f"Game finished. Winner: {winner_agent} (Player {winner_str})")
+            return winner_index
+                
+        logger.warning("No winner found in match info.")
+        return None
+
     def __init_game(self):
         gnubg.command("new game")
         gnubg.command("set player 0 human")
@@ -78,20 +108,6 @@ class Game:
                 extra_input = self.agent2.filter_inputs(possible_moves, hints, best_move)
                 move = self.agent2.choose_move(board, extra_input)
             move_piece(curr_player, move)
-            time.sleep(1)
+            time.sleep(0.2)
 
-        # Return winner info
-        match_info = gnubg.match()
-        logger.info(f"Game ended after {self.turn_count} turns.")
-        logger.debug(f"Match info: {match_info}")
-
-
-        if "games" in match_info and match_info["games"]:
-            latest_game = match_info["games"][-1]
-            if "info" in latest_game and "winner" in latest_game["info"]:
-                winner = map_winner(latest_game["info"]["winner"])  
-                logger.info(f"Game finished. Winner: {self.agent1 if winner == 0 else self.agent2}")
-                return winner
-
-        logger.warning("No winner found in match info.")
-        return None
+        return self.__find_winner()

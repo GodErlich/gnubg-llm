@@ -50,11 +50,11 @@ def get_board() -> Tuple[Tuple[int, ...], Tuple[int, ...]]:
     board_tuple = get_simple_board()
     posinfo = gnubg.posinfo()
     turn = posinfo["turn"]
-    if turn == 1:
-        # O's board on 0 , x's board on 1
+    if turn == 1: # means it's O's turn.
+        # O's board on 0 , X's board on 1
         reverse_o = reverse_board(board_tuple[0])
         return reverse_o, board_tuple[1] 
-    else:
+    else: # means it's X's turn
         # X's board on 0, O's board on 1
         reverse_x = reverse_board(board_tuple[0])
         return board_tuple[1], reverse_x
@@ -487,11 +487,14 @@ def roll_dice():
         return None
 
 def map_winner(game_result):
-    """Map the game result to a winner."""
-    if game_result == 'O':
+    """Map the game result to a winner.
+        0 is always associated with X which is agent1
+        1 is always associated with O which is agent2
+    """
+    if game_result == 'X':
         logger.debug(f"Game ended with agent1 winning.")
         return 0
-    elif game_result == 'X':
+    elif game_result == 'O':
         logger.debug(f"Game ended with agent2 winning.")
         return 1
     else:
