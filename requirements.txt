@@ -4,3 +4,4 @@ idna==3.10
 python-dotenv==1.1.0
 requests==2.32.3
 urllib3==2.5.0
+#gnubg==This package should not be here! even when the project uses import gnubg, it installs it diffrently. don't add it here!
