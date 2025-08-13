@@ -183,7 +183,6 @@ The project follows this execution flow:
 ### Core Functions
 - **[`gnubg.board()`](src/utils/gnubg_utils.py:86)** - Returns the current board state
 - **[`gnubg.command(cmd)`](src/utils/gnubg_utils.py:171)** - Executes a gnubg command-line command
-- **[`gnubg.evaluate()`](src/utils/gnubg_utils.py:36)** - Evaluates the current position
 - **[`gnubg.match()`](src/utils/gnubg_utils.py:24)** - Returns information about the current match
 - **[`gnubg.hint()`](src/utils/gnubg_utils.py:181)** - Gets move suggestions with equity evaluations
 - **[`gnubg.posinfo()`](src/utils/gnubg_utils.py:43)** - Returns position information including current player and dice
@@ -256,11 +255,6 @@ Returns comprehensive match information including:
 - Current game state
 - Winner information (when game ends)
 - Score tracking
-
-### Other gnubg Functions Used
-- **[`gnubg.pip()`](src/utils/gnubg_utils.py:43)** - Returns pip count (distance to finish) for each player
-- **[`gnubg.positionid()`](src/utils/gnubg_utils.py:50)** - Returns unique position identifier
-- **[`gnubg.evaluate()`](src/utils/gnubg_utils.py:36)** - Returns detailed position evaluation
 
 
 ## What is an agent in the project context?
