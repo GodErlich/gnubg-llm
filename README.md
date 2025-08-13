@@ -12,19 +12,19 @@ This code is an infrastructure for research.
 
 ## 🚀 Try It Now - No Installation Required!
 
-### Option 1: GitHub Codespaces
-1. Click the green **"Code"** button above
-2. Select **"Codespaces"** tab
-3. Click **"Create codespace on main"**
-4. Wait for setup (2-3 minutes) - everything installs automatically!
-5. Run: `python3 main.py` in the terminal
-
-### Option 2: Google Colab (No Account Required)
+### Option 1: Google Colab (No Account Required)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/demo.ipynb)
 1. Click the **"Open In Colab"** badge above
 2. **No sign-up required** - runs immediately
 3. Click **"Run All"** to set up everything automatically
 4. **Uses your project's Makefile and scripts** - complete integration!
+
+### Option 2: GitHub Codespaces
+1. Click the green **"Code"** button above
+2. Select **"Codespaces"** tab
+3. Click **"Create codespace on main"**
+4. Wait for setup (2-3 minutes) - everything installs automatically!
+5. Run: `python3 main.py` in the terminal
 
 ### Option 3: Gitpod
 1. Click the **[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)** badge above
