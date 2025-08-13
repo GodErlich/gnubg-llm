@@ -47,16 +47,3 @@ class Logger:
         self.log(f"WARNING: {message}")
 
 logger = Logger()
-
-# # test:
-# if __name__ == "__main__":
-#     # These will all return the same instance
-#     logger1 = Logger(log_file="game", output_folder="output", debug_mode=True)
-#     logger2 = Logger()  # Same instance, initialization parameters ignored
-#     logger3 = Logger(log_file="different", output_folder="other")  # Still same instance
-    
-#     print(f"Same instance? {logger1 is logger2 is logger3}")  # True
-    
-#     logger1.info("Application started")
-#     logger2.debug("This is a debug message")
-#     logger3.error("An error occurred")
