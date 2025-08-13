@@ -17,12 +17,6 @@ load_dotenv()
 LLM_API_URL = os.getenv("LLM_API_URL")
 LLM_API_KEY = os.getenv("LLM_API_KEY")
 
-def get_player_name() -> str:
-    """Get the name of the current player."""
-    posinfo = gnubg.posinfo()
-    turn = posinfo["turn"]
-    return "X" if turn == 1 else "O"
-
 def get_dice() -> Tuple[int, int]:
     """Get the current dice rolled."""
     posinfo = gnubg.posinfo()
@@ -348,7 +342,7 @@ def extract_fields_from_text(content: str, schema: Dict, possible_moves=None) ->
 
 
 
-def consult_llm(board_repr: str, prompt: str, system_prompt: str = None,
+def consult_llm(board_repr: str, prompt: str, system_prompt: str,
                 possible_moves: List = [], hints: List = [],
                 best_move: str = '', schema: Dict[str, Any] = None, **prompt_params):
     """Send game state to LLM and get response based on schema or move recommendation
@@ -398,10 +392,8 @@ def consult_llm(board_repr: str, prompt: str, system_prompt: str = None,
         return None
 
 
-def call_openai_api(prompt, system_prompt=None):
+def call_openai_api(prompt:str, system_prompt:str):
     """Call the OpenAI API"""
-    if not system_prompt:
-        system_prompt = "You are an expert backgammon assistant."
     try:
         base_url = os.getenv("LLM_API_URL")
         deployment = "gpt-4o"

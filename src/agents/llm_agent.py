@@ -3,7 +3,6 @@ from ..interfaces import AgentInputConfig, AgentInput
 from ..utils import consult_llm
 from ..logger import logger
 
-
 default_prompt = """
     You are an expert backgammon player choosing the best move in this position.
     You have never lost against gnubg because of your superior strategy.
@@ -37,15 +36,13 @@ default_prompt = """
     Begin with a brief assessment of the position and what key objectives you see.
     """
 
+default_system_prompt = "You are an expert backgammon assistant."
 
 class LLMAgent(Agent):
     """Agent that uses an LLM to select moves (uses prompt if provided)."""
     def __init__(self, inputs: AgentInputConfig = {}, prompt=None, system_prompt=None):
-        if prompt is None:
-            self.defaultPrompt = default_prompt
-        else:
-            self.defaultPrompt = prompt
-        self.system_prompt = system_prompt
+        self.defaultPrompt = prompt or default_prompt
+        self.system_prompt = system_prompt or default_system_prompt
         super().__init__(inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
