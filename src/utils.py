@@ -376,21 +376,22 @@ def extract_move_from_llm_response(response, possible_moves):
         logger.error(f"Error extracting move from response: {e}")
         return None
 
-def consult_llm(board_repr:str, prompt: str =None, system_prompt: str =None,
-                possible_moves: Optional[List[str]] = None, hints: Optional[List[Hint]] = None,
-                best_move: Optional[str] = None, **prompt_params):
+def consult_llm(board_repr:str, prompt: str, system_prompt: str =None,
+                possible_moves: List[str] = [], hints: List[Hint] = [],
+                best_move: str = '', **prompt_params):
     """Send game state to LLM and get move recommendation
         **prompt_params: Additional parameters to inject into the prompt
     """
     try:
         if not prompt:
-            prompt = default_prompt(board_repr)
+            logger.error("Prompt is required for LLM consultation.")
+            return None
 
         prompt_params = {
             "board_repr": board_repr,
-            "possible_moves": possible_moves if possible_moves else [],
-            "hints": hints if hints else [],
-            "best_move": best_move if best_move else None,
+            "possible_moves": possible_moves,
+            "hints": hints,
+            "best_move": best_move,
             **prompt_params
         }
         
