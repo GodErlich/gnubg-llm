@@ -16,23 +16,27 @@ This code is an infrastructure for research.
 1. Click the **"Open In Colab"** badge above
 2. **No sign-up required** - runs immediately
 3. Click **"Run All"** to set up everything automatically
-4. **Uses your project's Makefile and scripts** - complete integration!
+4. Follow the steps to understand everything better.
+5. Start experimenting!
 
-### Option 2: GitHub Codespaces
+### Option 2: Gitpod
+**[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)**
+1. Click the **"Gitpod Ready-to-Code"** badge above
+2. Sign in with GitHub
+3. Wait for environment setup
+4. Make sure you are inside gnubg-llm folder
+5. Run: `python3 main.py` in the terminal
+6. Start experimenting!
+
+### Option 3: GitHub Codespaces
 [![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
 1. Click the **"GitHub Codespaces"** badge above
 2. Select **"Codespaces"** tab
 3. Click **"Create codespace on main"**
 4. Wait for setup (2-3 minutes) - everything installs automatically!
 5. Run: `python3 main.py` in the terminal
+6. Start experimenting!
 
-### Option 3: Gitpod
-**[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)**
-1. Click the **"Gitpod Ready-to-Code"** badge above
-2. Sign in with GitHub
-3. Wait for environment setup
-4. **Interactive Demo**: Open [`demo.ipynb`](demo.ipynb:1) for guided exploration
-5. Start experimenting!
 
 ## Prerequisites for Local Setup:
 ### Windows OS
