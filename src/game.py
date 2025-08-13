@@ -3,7 +3,7 @@ import gnubg
 import time
 
 from .agents import Agent
-from .utils import get_dice, get_simple_board, get_possible_moves, move_piece, roll_dice, get_hints, get_best_move, map_winner
+from .utils import get_dice, get_simple_board, get_possible_moves, move_piece, roll_dice, get_hints, get_best_move, map_winner, is_cube_decision, handle_cube_decision
 from .logger import logger
 
 class Game:
@@ -47,7 +47,24 @@ class Game:
 
             logger.debug(f"Turn {self.turn_count}, Player {curr_player} - Board: {board}")
             roll_dice()
-            logger.debug(f"Player {curr_player} rolled dice: {get_dice()}")
+            dice = get_dice()
+            logger.debug(f"Player {curr_player} rolled dice: {dice}")
+            
+            # Handle cube decisions
+            if is_cube_decision():
+                logger.debug(f"Player {curr_player} has a cube decision")
+                cube_handled = handle_cube_decision()
+                if cube_handled:
+                    # After handling cube decision, check if we need to roll again
+                    dice = get_dice()
+                    logger.debug(f"After cube decision, dice: {dice}")
+                    if dice == (0, 0):
+                        # Still a cube situation, continue to next turn
+                        continue
+                else:
+                    logger.warning(f"Failed to handle cube decision for {curr_player}")
+                    continue
+
             possible_moves = get_possible_moves()
             hints = get_hints()
             best_move = get_best_move()

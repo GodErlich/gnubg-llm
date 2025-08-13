@@ -483,6 +483,27 @@ def call_openai_api(prompt, system_prompt=None):
         logger.error(f"Error calling API: {e}")
         return None
 
+def is_cube_decision() -> bool:
+    """Check if current position requires a cube decision."""
+    dice = get_dice()
+    return dice == (0, 0)
+
+def handle_cube_decision() -> bool:
+    """Handle cube decisions through agent or automatically."""
+    try:
+        logger.debug("Not offering double, continuing with normal play")
+        gnubg.command("roll")  # Continue to normal dice roll
+        return True
+            
+    except Exception as e:
+        logger.error(f"Error handling cube decision: {e}")
+        # Fallback - let gnubg decide
+        try:
+            gnubg.command("play")
+            return True
+        except:
+            return False
+
 def roll_dice():
     """Roll the dice using gnubg."""
     try:

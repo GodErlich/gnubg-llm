@@ -23,6 +23,20 @@ class Agent(ABC):
     def choose_move(self, board, possible_moves=None, hints=None, prompt=None):
         pass
 
+    def choose_cube_action(self, board, cube_decision):
+        """Choose cube action (double, accept, decline). Default: conservative approach."""
+        decision_type = cube_decision.get("decision_type", "unknown")
+        
+        if decision_type == "take_decision":
+            # Someone offered us a double - decline it (conservative)
+            return "decline"
+        elif decision_type == "double_decision":
+            # We can offer a double - don't offer it (conservative)
+            return "no_double"
+        else:
+            # Unknown decision - be conservative
+            return "decline"
+
     def filter_inputs(self, possible_moves, hints, best_move):
         """Filter inputs based on the agent's configuration. DO NOTs use this method"""
         inputs = {"possible_moves": None, "hints": None, "best_move": None}
