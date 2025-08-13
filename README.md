@@ -110,7 +110,7 @@ and put the real values in there.
 - **[`app.py`](app.py:1)** - Bridge script that sets up the Python environment and imports the game logic. This is the file that gnubg actually executes with the `-p` flag.
 
 ### Source Directory ([`src/`](src/))
-- **[`example.py`](src/example.py:1)** - Main game orchestrator that reads environment variables, creates agents, initializes logging, and starts a single game.
+- **[`game_orchestrator.py`](src/game_orchestrator.py:1)** - Main game orchestrator that reads environment variables, creates agents, initializes logging, and starts a single game.
 - **[`game.py`](src/game.py:1)** - Core game loop implementation. Manages turns, dice rolling, move validation, and determines winners.
 - **[`utils.py`](src/utils.py:1)** - Utility functions for board operations, move validation, LLM integration, and gnubg command wrappers.
 - **[`logger.py`](src/logger.py:1)** - Singleton logger class that handles file and console logging with different severity levels.
@@ -130,8 +130,8 @@ The project follows this execution flow:
 
 1. **Entry Point**: [`main.py`](main.py:1) parses command-line arguments and starts batch execution
 2. **Game Launcher**: For each game, [`main.py`](main.py:1) calls `gnubg -t -p app.py` with environment variables
-3. **Environment Setup**: [`app.py`](app.py:1) sets up Python paths and imports [`src.example.main`](src/example.py:19)
-4. **Game Initialization**: [`example.py`](src/example.py:1) reads config from environment, creates agents and logger, initializes a [`Game`](src/game.py:9) instance
+3. **Environment Setup**: [`app.py`](app.py:1) sets up Python paths and imports [`src.game_orchestrator.main`](src/game_orchestrator.py:19)
+4. **Game Initialization**: [`game_orchestrator.py`](src/game_orchestrator.py:1) reads config from environment, creates agents and logger, initializes a [`Game`](src/game.py:9) instance
 5. **Game Loop**: [`game.py`](src/game.py:1) runs the main game loop:
    - Checks for game end conditions
    - Determines current player
@@ -271,12 +271,12 @@ Works only when running gnubg directly by writing ( gnubg -p main.py )
 
 
 ### Additional customization ( proceed with caution )
-To change the code that runs, create a yourfile.py file in the src folder with a main function, you can check example.py for reference.
+To change the code that runs, create a yourfile.py file in the src folder with a main function, you can check game_orchestrator.py for reference.
 use game class to create a game, add agents and their configurations.
 When you are done, change the import in the main.py file to your file.
-In line 26 in main.py file: "from src.example import main" change to "from src.yourfile import main"
+In line 26 in main.py file: "from src.game_orchestrator import main" change to "from src.yourfile import main"
 
-You can also change directly the code in example.py file.
+You can also change directly the code in game_orchestrator.py file.
 
 
 ## 🌐 Cloud Development Features

@@ -19,7 +19,7 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 try:
-    from src.example import main # change this to your own module. make sure the file is in the src directory.
+    from game_orchestrator import main # change this to your own module. make sure the file is in the src directory.
 except ImportError as e:
     print(f"Import error: {e}")
     # List all Python files for debugging
