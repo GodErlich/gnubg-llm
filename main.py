@@ -68,7 +68,7 @@ def main():
                         help='Enable debug mode for detailed logging (default: False)') #TODO: return debug mode to false
     
     # Agent input configuration arguments
-    parser.add_argument('--possible_moves', '--pb', action='store_true', default=False,
+    parser.add_argument('--possible_moves', '--pm', action='store_true', default=False,
                         help='Enable possible moves input for agents')
     parser.add_argument('--hints', '--hi', action='store_true', default=False,
                         help='Enable hints input for agents')
