@@ -1,5 +1,4 @@
 import gnubg
-import time
 from typing import Callable
 
 from .agents import Agent
@@ -108,6 +107,5 @@ class Game:
                 extra_input = self.agent2.filter_inputs(possible_moves, hints, best_move)
                 move = self.agent2.choose_move(board, extra_input)
             move_piece(curr_player, move)
-            time.sleep(0.2)
 
         return self.__find_winner()
