@@ -211,6 +211,7 @@ def get_possible_moves() -> List[str]:
         return []
         
 def get_hints() -> List[Hint]:
+    top_hints = 10
     try:
         hints = gnubg.hint()
         hint_moves = hints.get("hint", [])
@@ -218,7 +219,7 @@ def get_hints() -> List[Hint]:
             moves = [
                 {"move": m["move"], "equity": m.get("equity", 0)} for m in hint_moves
             ]
-            return moves
+            return moves[:top_hints]
         else:
             return []
     except Exception:
