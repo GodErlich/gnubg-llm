@@ -59,8 +59,8 @@ def get_board() -> Tuple[Tuple[int, ...], Tuple[int, ...]]:
         reverse_x = reverse_board(board_tuple[0])
         return board_tuple[1], reverse_x
 
-def new_default_board_representation() -> str:
-    """ use get_board to create a new default board representation."""
+def default_board_representation() -> str:
+    """ create a human readable board, that is easy to understand and good for llm"""
     board = get_board()
     board_state = []
     for i in range(0, 24):
@@ -79,33 +79,6 @@ def new_default_board_representation() -> str:
 
     return f"Backgammon board state:\t{chr(9).join(board_state)}\t{on_bar}"
 
-
-def default_board_representation() -> str:
-    board_tuple = get_simple_board()
-    posinfo = gnubg.posinfo()
-    turn = posinfo["turn"]
-    board_state = []
-
-    o = board_tuple[0 if turn == 1 else 1]
-    x = board_tuple[1 if turn == 1 else 0]
-    for i in range(0, 24):
-        x_pos = i if turn == 1 else 23 - i
-        o_pos = 23 - i if turn == 1 else i
-
-        pos = i + 1
-        if x[x_pos] > 0:
-            board_state.append(f"{pos}: X has {x[x_pos]}")
-        elif o[o_pos] > 0:
-            board_state.append(f"{pos}: O has {o[o_pos]}")
-        else:
-            board_state.append(f"{pos}: empty")
-
-    bar_X = x[24]
-    bar_O = o[24]
-
-    on_bar = f"Bar: X has {bar_X}, O has {bar_O}"
-
-    return f"Backgammon board state:\t{chr(9).join(board_state)}\t{on_bar}"
 
 def is_valid_move(move: str) -> bool:
     """Check if a move is valid according to gnubg move format."""
