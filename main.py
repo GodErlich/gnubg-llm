@@ -4,7 +4,7 @@ import os
 import argparse
 import sys
 
-def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves=False, hints=False, best_move=False):
+def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None):
     """Run a single game silently and return winner"""
     # Set environment variables to pass parameters to the game
     env = os.environ.copy()
@@ -16,6 +16,8 @@ def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, 
     env['GAME_POSSIBLE_MOVES'] = str(possible_moves).lower()
     env['GAME_HINTS'] = str(hints).lower()
     env['GAME_BEST_MOVE'] = str(best_move).lower()
+    env['GAME_PROMPT'] = prompt or ""
+    env['GAME_SYSTEM_PROMPT'] = system_prompt or ""
     
     # Redirect gnubg output to /dev/null
     with open(os.devnull, 'w') as devnull:
@@ -27,7 +29,7 @@ def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, 
     # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
     return result.returncode
 
-def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=True, possible_moves=False, hints=False, best_move=False):
+def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=True, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None):
     """Run multiple games and show summary"""
     print(f"Running {num_games} games...")
     
@@ -38,7 +40,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
         if (i + 1) % 10 == 0:
             print(f"Progress: {i + 1}/{num_games}")
         
-        winner = run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move)
+        winner = run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move, prompt, system_prompt)
         if winner == 0:
             agent1_wins += 1
         elif winner == 1:
@@ -54,6 +56,10 @@ def main():
     parser = argparse.ArgumentParser(description='Run backgammon games with configurable agents')
     parser.add_argument('--log_file_name', '--fn', type=str, default='game',
                         help='Name for the log file (default: game)')
+    parser.add_argument('--prompt', '--p', type=str, default=None,
+                        help='Custom prompt for the LLM agent (default: None)')
+    parser.add_argument('--system_prompt', '--sp', type=str, default=None,
+                        help='Custom system prompt for the LLM agent (default: None)')
     parser.add_argument('--log_folder_path', '--fp', type=str, default='output',
                         help='Folder path for logs (default: output)')
     parser.add_argument('--agent1', '--a1', type=str, default='BestMoveAgent',
@@ -89,6 +95,8 @@ def main():
         agent1=args.agent1,
         agent2=args.agent2,
         debug_mode=args.debug_mode,
+        prompt=args.prompt,
+        system_prompt=args.system_prompt,
         possible_moves=args.possible_moves,
         hints=args.hints,
         best_move=args.best_move

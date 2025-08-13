@@ -13,18 +13,24 @@ def get_agent_input_config_from_env() -> AgentInputConfig:
         best_move=os.getenv('GAME_BEST_MOVE', 'false').lower() == 'true'
     )
 
-def create_agent(agent_type, inputs: AgentInputConfig=None):
+def get_prompts_from_env() -> tuple:
+    """Get prompts from environment variables"""
+    prompt = os.getenv('GAME_PROMPT', None)
+    system_prompt = os.getenv('GAME_SYSTEM_PROMPT', None)
+    return prompt, system_prompt
+
+def create_agent(agent_type, inputs: AgentInputConfig=None, prompt: str=None, system_prompt:str=None):
     """Factory function to create agents based on type string"""
     if agent_type == "BestMoveAgent":
         return BestMoveAgent(inputs=inputs)
     elif agent_type == "RandomAgent":
         return RandomAgent(inputs=inputs)
     elif agent_type == "LLMAgent":
-        return LLMAgent(inputs=inputs)
+        return LLMAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
     elif agent_type == "LiveCodeAgent":
         # Note: LiveCodeAgent is not fully implemented yet. return LLM for now.
         #return LiveCodeAgent(inputs=inputs)
-        return LLMAgent(inputs=inputs)
+        return LLMAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
     else:
         raise ValueError(f"Unknown agent type: {agent_type}")
 
@@ -38,13 +44,13 @@ def main():
     
     # Get agent input configuration from environment variables
     agent_inputs = get_agent_input_config_from_env()
-
+    prompt, system_prompt = get_prompts_from_env()
     # Initialize logger with custom parameters
     logger = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
     
     try:
-        agent1 = create_agent(agent1_type, inputs=agent_inputs)
-        agent2 = create_agent(agent2_type, inputs=agent_inputs)
+        agent1 = create_agent(agent1_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
+        agent2 = create_agent(agent2_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
     except ValueError as e:
         logger.error(f"Error creating agents: {e}")
         return None

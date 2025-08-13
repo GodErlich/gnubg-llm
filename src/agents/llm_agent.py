@@ -34,6 +34,7 @@ default_prompt = """
     Lower (more negative) values indicate worse moves in this context.
     
     Begin with a brief assessment of the position and what key objectives you see.
+    Return one best move according to your analysis.
     """
 
 default_system_prompt = "You are an expert backgammon assistant."
