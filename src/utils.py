@@ -5,11 +5,11 @@ import re
 import random
 
 import requests
-import dotenv
+from dotenv import load_dotenv
 
 from .interfaces import Hint
 from .logger import logger
-dotenv.load_dotenv()
+load_dotenv()
 
 # LLM API configuration
 LLM_API_URL = os.getenv("LLM_API_URL")
