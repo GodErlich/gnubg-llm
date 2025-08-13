@@ -24,7 +24,7 @@ def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode):
     # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
     return result.returncode
 
-def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="DebugAgent", agent2="RandomAgent", debug_mode=True):
+def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=True):
     """Run multiple games and show summary"""
     print(f"Running {num_games} games...")
     
@@ -53,11 +53,11 @@ def main():
                         help='Name for the log file (default: game)')
     parser.add_argument('--log_folder_path', '--fp', type=str, default='output',
                         help='Folder path for logs (default: output)')
-    parser.add_argument('--agent1', '--a1', type=str, default='DebugAgent',
-                        choices=['DebugAgent', 'RandomAgent', 'LLMAgent', 'LiveCodeAgent'],
-                        help='Agent type for player 1 (default: DebugAgent)')
+    parser.add_argument('--agent1', '--a1', type=str, default='BestMoveAgent',
+                        choices=['BestMoveAgent', 'RandomAgent', 'LLMAgent', 'LiveCodeAgent'],
+                        help='Agent type for player 1 (default: BestMoveAgent)')
     parser.add_argument('--agent2', '--a2', type=str, default='RandomAgent',
-                        choices=['DebugAgent', 'RandomAgent', 'LLMAgent', 'LiveCodeAgent'],
+                        choices=['BestMoveAgent', 'RandomAgent', 'LLMAgent', 'LiveCodeAgent'],
                         help='Agent type for player 2 (default: RandomAgent)')
     parser.add_argument('--number_of_games', '--n', type=int, default=1,
                         help='Number of games to play (default: 1)')

@@ -55,7 +55,7 @@ tasks:
       echo "🚀 Quick commands:"
       echo "  python3 main.py                    # Run single game"
       echo "  python3 main.py --n 5              # Run 5 games"
-      echo "  python3 main.py --a1 RandomAgent --a2 DebugAgent --n 3"
+      echo "  python3 main.py --a1 RandomAgent --a2 BestMoveAgent --n 3"
       echo ""
       echo "🧪 Testing gnubg access:"
       gnubg --version 2>/dev/null && echo "✅ GNU Backgammon is accessible" || echo "⚠️ GNU Backgammon path issue"

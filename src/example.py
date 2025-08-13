@@ -1,12 +1,12 @@
 import os
 from .game import Game
-from .agents import DebugAgent, RandomAgent, LLMAgent, LiveCodeAgent
+from .agents import BestMoveAgent, RandomAgent, LLMAgent, LiveCodeAgent
 from .logger import Logger
 
 def create_agent(agent_type):
     """Factory function to create agents based on type string"""
-    if agent_type == "DebugAgent":
-        return DebugAgent(inputs={"possible_moves": True, "hints": True, "best_move": True})
+    if agent_type == "BestMoveAgent":
+        return BestMoveAgent(inputs={"best_move": True})
     elif agent_type == "RandomAgent":
         return RandomAgent()
     elif agent_type == "LLMAgent":
@@ -20,7 +20,7 @@ def main():
     # Get configuration from environment variables
     log_file_name = os.getenv('GAME_LOG_FILE', 'game')
     log_folder_path = os.getenv('GAME_LOG_PATH', 'output')
-    agent1_type = os.getenv('GAME_AGENT1', 'DebugAgent')
+    agent1_type = os.getenv('GAME_AGENT1', 'BestMoveAgent')
     agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
     debug_mode = os.getenv('GAME_DEBUG_MODE', 'true').lower() == 'true'
 

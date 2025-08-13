@@ -61,9 +61,9 @@ There are few parameters that can be passed to the program.
                         Name for the log file (default: game)
   --log_folder_path, --fp LOG_FOLDER_PATH,
                         Folder path for logs (default: output)
-  --agent1, --a1 {DebugAgent,RandomAgent,LLMAgent,LiveCodeAgent},
-                        Agent type for player 1 (default: DebugAgent)
-  --agent2, --a2 {DebugAgent,RandomAgent,LLMAgent,LiveCodeAgent},
+  --agent1, --a1 {BestMoveAgent,RandomAgent,LLMAgent,LiveCodeAgent},
+                        Agent type for player 1 (default: BestMoveAgent)
+  --agent2, --a2 {BestMoveAgent,RandomAgent,LLMAgent,LiveCodeAgent},
                         Agent type for player 2 (default: RandomAgent)
   --number_of_games, --n NUMBER_OF_GAMES,
                         Number of games to play (default: 1)
@@ -142,7 +142,7 @@ The project follows this execution flow:
    - Repeats until game ends or max turns reached
 6. **Agent Decision**: Each agent type implements its own strategy:
    - **RandomAgent**: Picks randomly from valid moves
-   - **DebugAgent**: Logs detailed information then picks randomly
+   - **BestMoveAgent**: Always picks best move according to gnubg engine
    - **LLMAgent**: Sends game state to external LLM for strategic analysis
    - **LiveCodeAgent**: Asks LLM to generate and execute Python code
 7. **Logging**: Throughout execution, [`logger.py`](src/logger.py:1) records game events and debug information

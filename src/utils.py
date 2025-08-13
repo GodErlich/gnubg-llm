@@ -217,15 +217,6 @@ def get_best_move() -> str:
         logger.error(f"Error with findbestmove: {e}")
         return None
 
-def random_move():
-    """ makes a valid random move"""
-    all_moves =  get_possible_moves()
-    if not all_moves or len(all_moves) == 0:
-        logger.info("No possible moves found")
-        return None
-    
-    return all_moves[0]
-
 
 def default_prompt(board_repr=None):
     # Extract the list of moves from the hint data
