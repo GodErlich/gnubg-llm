@@ -55,7 +55,7 @@ Open bash where you want to clone the project. (Windows users open WSL). Then ru
 4. If you wish to stop the run in the middle, just click `Ctrl + c` in the terminal.
 
 ## Run configurations
-There are few parameters that can be passed to the program.
+There are several parameters that can be passed to the program.
   -h, --help            show this help message and exit
   --log_file_name, --fn  LOG_FILE_NAME,
                         Name for the log file (default: game)
@@ -68,13 +68,37 @@ There are few parameters that can be passed to the program.
   --number_of_games, --n NUMBER_OF_GAMES,
                         Number of games to play (default: 1)
   --debug_mode, --d     Enable debug mode for detailed logging (default: False)
+  --prompt, --p         Custom prompt for the LLM agent (default: None)
+  --system_prompt, --sp Custom system prompt for the LLM agent (default: None)
+  --possible_moves, --pm Enable possible moves input for agents
+  --hints, --hi         Enable hints input for agents
+  --best_move, --bm     Enable best move input for agents
 
-For example: `python3 main.py --a1 RandomAgent --a2 RandomAgent --n 3 --d`
-Will run the game for 3 times with RandomAgent vs RandomAgent and additional debug logs will be printed.
+### Examples:
+- `python3 main.py --a1 RandomAgent --a2 RandomAgent --n 3 --d`
+  Will run 3 games with RandomAgent vs RandomAgent and debug logs.
+- `python3 main.py --a1 LLMAgent --a2 BestMoveAgent --p "Play aggressively" --sp "You are a backgammon expert" --pm --hi`
+  Will run LLM agent with custom prompts and additional input (possible moves and hints).
 
 ## Notice!
-To run Agents that uses llm you have to create .env file with your parameters.
-Just duplicate `example.env` file change the duplicated file name to .env and put the real values in there.
+To run Agents that use LLM you have to create a .env file with your parameters.
+Just duplicate `example.env` file, change the duplicated file name to .env and put the real values in there.
+
+## Advanced LLM Features
+
+### Custom Prompts
+You can provide custom prompts and system prompts for LLM agents:
+- Use `--prompt` or `--p` to set a custom user prompt
+- Use `--system_prompt` or `--sp` to set a custom system prompt
+
+### Response Schema Support
+The LLM agent supports structured response schemas. When using a schema, the LLM will attempt to return JSON-formatted responses that match the expected structure. This enables more reliable parsing of complex agent responses beyond simple move selection.
+
+### Agent Input Configuration
+Control what information is provided to agents:
+- `--possible_moves` (`--pm`): Provides list of all valid moves
+- `--hints` (`--hi`): Provides move quality hints and evaluations
+- `--best_move` (`--bm`): Provides the engine's recommended best move
 
 ## Important Files Explanations
 
@@ -112,15 +136,21 @@ and put the real values in there.
 ### Source Directory ([`src/`](src/))
 - **[`game_orchestrator.py`](src/game_orchestrator.py:1)** - Main game orchestrator that reads environment variables, creates agents, initializes logging, and starts a single game.
 - **[`game.py`](src/game.py:1)** - Core game loop implementation. Manages turns, dice rolling, move validation, and determines winners.
-- **[`utils.py`](src/utils.py:1)** - Utility functions for board operations, move validation, LLM integration, and gnubg command wrappers.
 - **[`logger.py`](src/logger.py:1)** - Singleton logger class that handles file and console logging with different severity levels.
 - **[`interfaces.py`](src/interfaces.py:1)** - TypedDict definitions for type safety across agent inputs and hint structures.
+
+### Utils Directory ([`src/utils/`](src/utils/))
+The utils module has been restructured into separate files for better organization:
+- **[`__init__.py`](src/utils/__init__.py:1)** - Package initialization that exports all utility functions.
+- **[`gnubg_utils.py`](src/utils/gnubg_utils.py:1)** - Utility functions for gnubg command wrappers, board operations, and move validation.
+- **[`llm_utils.py`](src/utils/llm_utils.py:1)** - LLM integration utilities including API calls, response parsing, and schema validation.
+- **[`game_utils.py`](src/utils/game_utils.py:1)** - Game-specific utility functions for dice rolling, move generation, and game state management.
 
 ### Agents Directory ([`src/agents/`](src/agents/))
 - **[`base.py`](src/agents/base.py:1)** - Abstract base class defining the agent interface and input filtering mechanism.
 - **[`random_agent.py`](src/agents/random_agent.py:1)** - Simple agent that selects random valid moves from available options.
 - **[`best_move_agent.py`](src/agents/best_move_agent.py:1)** - Development agent that logs detailed game state information while making random moves.
-- **[`llm_agent.py`](src/agents/llm_agent.py:1)** - AI agent that uses external LLM APIs to analyze positions and select moves based on strategic reasoning.
+- **[`llm_agent.py`](src/agents/llm_agent.py:1)** - AI agent that uses external LLM APIs to analyze positions and select moves based on strategic reasoning. Supports custom prompts and response schemas for structured output.
 - **[`live_code_agent.py`](src/agents/live_code_agent.py:1)** - Experimental agent that asks an LLM to generate Python code for move selection and executes it dynamically.
 - **[`__init__.py`](src/agents/__init__.py:1)** - Package initialization file that exports all agent classes.
 
@@ -151,17 +181,17 @@ The project follows this execution flow:
 ## gnubg Documentation
 
 ### Core Functions
-- **[`gnubg.board()`](src/utils.py:86)** - Returns the current board state
-- **[`gnubg.command(cmd)`](src/utils.py:171)** - Executes a gnubg command-line command
-- **[`gnubg.evaluate()`](src/utils.py:36)** - Evaluates the current position
-- **[`gnubg.match()`](src/utils.py:24)** - Returns information about the current match
-- **[`gnubg.hint()`](src/utils.py:181)** - Gets move suggestions with equity evaluations
-- **[`gnubg.posinfo()`](src/utils.py:43)** - Returns position information including current player and dice
+- **[`gnubg.board()`](src/utils/gnubg_utils.py:86)** - Returns the current board state
+- **[`gnubg.command(cmd)`](src/utils/gnubg_utils.py:171)** - Executes a gnubg command-line command
+- **[`gnubg.evaluate()`](src/utils/gnubg_utils.py:36)** - Evaluates the current position
+- **[`gnubg.match()`](src/utils/gnubg_utils.py:24)** - Returns information about the current match
+- **[`gnubg.hint()`](src/utils/gnubg_utils.py:181)** - Gets move suggestions with equity evaluations
+- **[`gnubg.posinfo()`](src/utils/gnubg_utils.py:43)** - Returns position information including current player and dice
 
 ### gnubg.board()
 Returns 2 tuples of size 25. Each index represents the number of checkers in that position. The last index (24) represents the Bar (when a checker gets hit, it's sent to the middle bar).
 
-The first tuple represents the current player's checkers, the second tuple represents the opponent's checkers. Use [`get_simple_board()`](src/utils.py:85) to get raw board data or [`default_board_representation()`](src/utils.py:123) for human-readable format.
+The first tuple represents the current player's checkers, the second tuple represents the opponent's checkers. Use [`get_simple_board()`](src/utils/gnubg_utils.py:85) to get raw board data or [`default_board_representation()`](src/utils/gnubg_utils.py:123) for human-readable format.
 
 ### gnubg.command('cmd')
 Executes any gnubg command. Common commands used in this project:
@@ -203,7 +233,7 @@ Executes a checker move using gnubg's move notation. The move command accepts va
 - Must bear off legally when in home board and no checkers behind
 
 #### Error Handling:
-If an invalid move is provided, gnubg will ignore the command. Always use [`move_piece()`](src/utils.py:161) which includes error handling.
+If an invalid move is provided, gnubg will ignore the command. Always use [`move_piece()`](src/utils/gnubg_utils.py:161) which includes error handling.
 
 ### gnubg.hint()
 Returns detailed move analysis including:
@@ -212,7 +242,7 @@ Returns detailed move analysis including:
 - Gammon probabilities
 - Move quality rankings
 
-Used by [`get_possible_moves()`](src/utils.py:179), [`get_hints()`](src/utils.py:193), and [`get_best_move()`](src/utils.py:207).
+Used by [`get_possible_moves()`](src/utils/gnubg_utils.py:179), [`get_hints()`](src/utils/gnubg_utils.py:193), and [`get_best_move()`](src/utils/gnubg_utils.py:207).
 
 ### gnubg.posinfo()
 Returns position information including:
@@ -228,9 +258,9 @@ Returns comprehensive match information including:
 - Score tracking
 
 ### Other gnubg Functions Used
-- **[`gnubg.pip()`](src/utils.py:43)** - Returns pip count (distance to finish) for each player
-- **[`gnubg.positionid()`](src/utils.py:50)** - Returns unique position identifier
-- **[`gnubg.evaluate()`](src/utils.py:36)** - Returns detailed position evaluation
+- **[`gnubg.pip()`](src/utils/gnubg_utils.py:43)** - Returns pip count (distance to finish) for each player
+- **[`gnubg.positionid()`](src/utils/gnubg_utils.py:50)** - Returns unique position identifier
+- **[`gnubg.evaluate()`](src/utils/gnubg_utils.py:36)** - Returns detailed position evaluation
 
 
 ## What is an agent in the project context?
@@ -249,6 +279,7 @@ The agent will decide what to do with the above input + additional text(prompt),
 
 ## Create new agents
 If you want to add a new agent with different behavior, add a new file called "your_agent_name.py" to the agents folder under src, then add the import in the __init__.py file inside the agents folder.
+Add the agent class to the create_agent function in [`game_orchestrator.py`](src/game_orchestrator.py)
 In this file create an Agent class (for reference look into random_agent.py), lastly customize the
 function choose_move as you wish.
 
@@ -262,6 +293,7 @@ The [`Game`](src/game.py:9) class supports custom board representation functions
    ```python
    def my_custom_board_representation() -> str:
        # Your custom logic here
+       from src.utils import get_simple_board
        board = get_simple_board()  # Get raw board data
        # Format the board as needed for your agent
        return f"Custom board format: {board}"
@@ -280,7 +312,7 @@ The [`Game`](src/game.py:9) class supports custom board representation functions
 
 ### Default Board Representation
 
-If no custom function is provided, the game uses [`default_board_representation()`](src/utils.py:123) which provides a board of the format:
+If no custom function is provided, the game uses [`default_board_representation()`](src/utils/gnubg_utils.py:123) which provides a board of the format:
 Backgammon board state:	1: O has 1	2: empty	3: O has 1	4: empty	5: empty	6: X has 5	7: empty	8: X has 3	9: empty	10: empty	11: empty	12: O has 4	13: X has 5	14: empty	15: empty	16: empty	17: O has 4	18: empty	19: O has 5	20: empty	21: empty	22: empty	23: empty	24: X has 2	Bar: X has 0, O has 0
 
 This flexibility allows research teams to experiment with different board representations to see how they affect agent performance and decision-making.
@@ -334,6 +366,9 @@ python3 main.py
 
 # Run 3 games with debug mode
 python3 main.py --a1 RandomAgent --a2 RandomAgent --n 3 --d
+
+# Run LLM agent with custom prompts and additional input
+python3 main.py --a1 LLMAgent --a2 BestMoveAgent --p "Play aggressively" --sp "You are a backgammon expert" --pm --hi
 
 ```
 
