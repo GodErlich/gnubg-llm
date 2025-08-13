@@ -3,16 +3,16 @@ from .game import Game
 from .agents import BestMoveAgent, RandomAgent, LLMAgent, LiveCodeAgent
 from .logger import Logger
 
-def create_agent(agent_type):
+def create_agent(agent_type, inputs=None):
     """Factory function to create agents based on type string"""
     if agent_type == "BestMoveAgent":
-        return BestMoveAgent(inputs={"best_move": True})
+        return BestMoveAgent(inputs=inputs)
     elif agent_type == "RandomAgent":
-        return RandomAgent(inputs={"possible_moves": True})
+        return RandomAgent(inputs=inputs)
     elif agent_type == "LLMAgent":
-        return LLMAgent()
+        return LLMAgent(inputs=inputs)
     elif agent_type == "LiveCodeAgent":
-        return LiveCodeAgent()
+        return LiveCodeAgent(inputs=inputs)
     else:
         raise ValueError(f"Unknown agent type: {agent_type}")
 

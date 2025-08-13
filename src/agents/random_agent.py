@@ -7,12 +7,13 @@ from ..logger import logger
 class RandomAgent(Agent):
     """Agent that uses gnubg to select moves"""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}):
-            super().__init__(board_representation, inputs)
+    def __init__(self, inputs: AgentInputConfig = {}):
+            super().__init__(inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
         """ choose a random move from the possible moves """
-        move = self.random_move(extra_input.get("possible_moves", []))
+        possible_moves = extra_input.get("possible_moves", [])
+        move = self.random_move(possible_moves)
         logger.debug(f"Random Move: {move}")
         return move
 

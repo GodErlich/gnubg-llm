@@ -6,8 +6,8 @@ from ..logger import logger
 class BestMoveAgent(Agent):
     """Agent that always picks the "best move" according to gnubg engine"""
 
-    def __init__(self, board_representation=None, inputs: AgentInputConfig = {}):
-        super().__init__(board_representation, inputs)
+    def __init__(self, inputs: AgentInputConfig = {}):
+        super().__init__(inputs)
 
     def choose_move(self, board, extra_input: AgentInput = None):
         """ choose a random move from the possible moves """

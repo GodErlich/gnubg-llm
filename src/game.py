@@ -2,16 +2,18 @@ import gnubg
 import time
 
 from .agents import Agent
-from .utils import get_dice, get_simple_board, get_possible_moves, move_piece, roll_dice, get_hints, get_best_move, map_winner, is_cube_decision, handle_cube_decision
+from .utils import default_board_representation, get_dice, get_simple_board, get_possible_moves, move_piece, roll_dice, get_hints, get_best_move, map_winner, is_cube_decision, handle_cube_decision
 from .logger import logger
 
 class Game:
     """Manages a backgammon game between two agents."""
-    def __init__(self, agent1: Agent, agent2: Agent, max_turns=200):
+    def __init__(self, agent1: Agent, agent2: Agent, max_turns=200, board_representation=None):
         self.agent1 = agent1
         self.agent2 = agent2
         self.max_turns = max_turns
         self.turn_count = 0
+        if board_representation is None:
+            self.board_representation = default_board_representation
 
     def __is_game_over(self):
         board = get_simple_board()
@@ -40,7 +42,7 @@ class Game:
             self.turn_count += 1
             logger.debug(f"Turn {self.turn_count} starting...")
             posinfo = gnubg.posinfo()
-            board = get_simple_board()
+            board = self.board_representation()
             turn = posinfo["turn"]
             curr_player = self.agent1 if turn == 0 else self.agent2
 
