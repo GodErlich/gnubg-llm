@@ -8,16 +8,36 @@ tasks:
   - name: Setup GNU Backgammon Environment
     init: |
       echo "🚀 Setting up GNU Backgammon Research Environment..."
+      
+      # Add gnubg to PATH first
+      export PATH="/usr/games:$PATH"
+      echo 'export PATH="/usr/games:$PATH"' >> ~/.bashrc
+      
       # Install system dependencies
       sudo apt-get update
       sudo apt-get install -y gnubg python3-dev
       
-      # Install Python dependencies
+      # Install Python dependencies to user directory first
       if [ -f requirements.txt ]; then
         pip3 install --user -r requirements.txt
       fi
       
-      # Test installation
+      # Install packages globally for gnubg access (Step 3 fix)
+      echo "🔧 Installing packages globally for GNU Backgammon access..."
+      
+      # Method 1: Standard global installation
+      sudo pip3 install --upgrade requests python-dotenv certifi charset-normalizer idna urllib3
+      
+      # Method 2: Install to system site-packages
+      PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+      sudo pip3 install --target /usr/lib/python3/dist-packages --upgrade requests python-dotenv
+      sudo pip3 install --target /usr/lib/python${PYTHON_VERSION}/dist-packages --upgrade requests python-dotenv || true
+      
+      # Method 3: Force reinstall to ensure availability
+      sudo pip3 install --force-reinstall --no-deps requests python-dotenv
+      
+      # Test gnubg installation
+      echo "🧪 Testing GNU Backgammon installation..."
       gnubg --version
       
       # Create output directory
@@ -27,12 +47,18 @@ tasks:
       echo ""
       echo "🎮 Try running: python3 main.py --help"
     command: |
+      # Ensure PATH includes gnubg location
+      export PATH="/usr/games:$PATH"
+      
       echo "🎲 GNU Backgammon Research Environment is ready!"
       echo ""
       echo "🚀 Quick commands:"
       echo "  python3 main.py                    # Run single game"
       echo "  python3 main.py --n 5              # Run 5 games"
       echo "  python3 main.py --a1 RandomAgent --a2 DebugAgent --n 3"
+      echo ""
+      echo "🧪 Testing gnubg access:"
+      gnubg --version 2>/dev/null && echo "✅ GNU Backgammon is accessible" || echo "⚠️ GNU Backgammon path issue"
       echo ""
       echo "📚 Check README.md for full documentation"
 
