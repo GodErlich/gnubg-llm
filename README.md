@@ -1,6 +1,5 @@
 # 🎲 GNU Backgammon Research Environment
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/GodErlich/gnubg-llm/blob/main/demo.ipynb)
-[![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/GodErlich/gnubg-llm)
 
 This code uses [gnubg module](https://www.gnu.org/software/gnubg/) to create backgammon "agents".
@@ -25,15 +24,6 @@ This code is an infrastructure for research.
 2. Sign in with GitHub
 3. Wait for environment setup
 4. Make sure you are inside gnubg-llm folder
-5. Run: `python3 main.py` in the terminal
-6. Start experimenting!
-
-### Option 3: GitHub Codespaces
-[![GitHub Codespaces](https://img.shields.io/badge/GitHub-Codespaces-blue?logo=github)](https://github.com/codespaces/new?hide_repo_select=true)
-1. Click the **"GitHub Codespaces"** badge above
-2. Select **"Codespaces"** tab
-3. Click **"Create codespace on main"**
-4. Wait for setup (2-3 minutes) - everything installs automatically!
 5. Run: `python3 main.py` in the terminal
 6. Start experimenting!
 
