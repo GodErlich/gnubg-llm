@@ -119,7 +119,7 @@ and put the real values in there.
 ### Agents Directory ([`src/agents/`](src/agents/))
 - **[`base.py`](src/agents/base.py:1)** - Abstract base class defining the agent interface and input filtering mechanism.
 - **[`random_agent.py`](src/agents/random_agent.py:1)** - Simple agent that selects random valid moves from available options.
-- **[`debug_agent.py`](src/agents/debug_agent.py:1)** - Development agent that logs detailed game state information while making random moves.
+- **[`best_move_agent.py`](src/agents/best_move_agent.py:1)** - Development agent that logs detailed game state information while making random moves.
 - **[`llm_agent.py`](src/agents/llm_agent.py:1)** - AI agent that uses external LLM APIs to analyze positions and select moves based on strategic reasoning.
 - **[`live_code_agent.py`](src/agents/live_code_agent.py:1)** - Experimental agent that asks an LLM to generate Python code for move selection and executes it dynamically.
 - **[`__init__.py`](src/agents/__init__.py:1)** - Package initialization file that exports all agent classes.
