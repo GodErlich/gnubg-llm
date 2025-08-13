@@ -17,4 +17,10 @@ __all__ = [
     "handle_cube_decision",
     "roll_dice",
     "is_valid_move",
+    "map_winner",
+    "get_pip_count",
+    "get_checkers_count",
+    "get_checkers_on_bar",
+    "determine_game_type",
+    "create_player_statistics",
 ]

@@ -1,4 +1,5 @@
 import os
+import json
 
 from .interfaces import AgentInputConfig
 from .game import Game
@@ -36,6 +37,7 @@ def create_agent(agent_type, inputs: AgentInputConfig=None, prompt: str=None, sy
 
 def main():
     # Get configuration from environment variables
+    game_id = int(os.getenv('GAME_ID', '1'))
     log_file_name = os.getenv('GAME_LOG_FILE', 'game')
     log_folder_path = os.getenv('GAME_LOG_PATH', 'output')
     agent1_type = os.getenv('GAME_AGENT1', 'BestMoveAgent')
@@ -55,8 +57,19 @@ def main():
         logger.error(f"Error creating agents: {e}")
         return None
 
-    game = Game(agent1, agent2)
+    game = Game(agent1, agent2, game_id=game_id)
 
     # Play the game
-    result = game.play()
-    return result
+    winner, game_stats = game.play()
+    
+    # Export statistics to JSON file
+    try:
+        os.makedirs(log_folder_path, exist_ok=True)
+        stats_file = os.path.join(log_folder_path, f"{log_file_name}_stats.json")
+        with open(stats_file, 'w') as f:
+            json.dump(game_stats, f, indent=2)
+        logger.info(f"Statistics exported to {stats_file}")
+    except Exception as e:
+        logger.error(f"Failed to export statistics: {e}")
+    
+    return winner, game_stats

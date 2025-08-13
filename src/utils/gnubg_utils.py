@@ -4,7 +4,7 @@ import random
 
 
 from .game_utils import is_valid_move
-from ..interfaces import Hint
+from ..interfaces import Hint, PlayerStatistics
 from ..logger import logger
 
 def get_dice() -> Tuple[int, int]:
@@ -170,4 +170,73 @@ def roll_dice():
     except Exception as e:
         logger.error(f"Error rolling dice: {e}")
         return None
+
+def get_pip_count() -> Tuple[int, int]:
+    """Get pip count for both players."""
+    try:
+        # Try to get pip count from gnubg
+        pip_info = gnubg.pip()
+        if pip_info and len(pip_info) >= 2:
+            return pip_info[0], pip_info[1]
+    except:
+        pass
+    
+    # Fallback: calculate pip count manually from board
+    board = get_simple_board()
+    pip1 = calculate_pip_count_from_board(board[0])
+    pip2 = calculate_pip_count_from_board(board[1])
+    return pip1, pip2
+
+def calculate_pip_count_from_board(player_board: Tuple[int, ...]) -> int:
+    """Calculate pip count from a player's board position."""
+    pip_count = 0
+    # Points 1-24
+    for i in range(24):
+        checkers = player_board[i]
+        distance = 24 - i  # Distance to bear off
+        pip_count += checkers * distance
+    
+    # Add checkers on bar (distance 25)
+    if len(player_board) > 24:
+        pip_count += player_board[24] * 25
+        
+    return pip_count
+
+def get_checkers_count() -> Tuple[int, int]:
+    """Get total checkers remaining for both players."""
+    board = get_simple_board()
+    player1_checkers = sum(board[0])
+    player2_checkers = sum(board[1])
+    return player1_checkers, player2_checkers
+
+def get_checkers_on_bar() -> Tuple[int, int]:
+    """Get checkers on bar for both players."""
+    board = get_simple_board()
+    player1_bar = board[0][24] if len(board[0]) > 24 else 0
+    player2_bar = board[1][24] if len(board[1]) > 24 else 0
+    return player1_bar, player2_bar
+
+def determine_game_type(winner_checkers: int, loser_checkers: int, loser_in_home: bool = False) -> str:
+    """Determine if the game was normal, gammon, or backgammon."""
+    if loser_checkers == 15:  # Loser hasn't borne off any checkers
+        if not loser_in_home:  # Loser has checkers in winner's home board or on bar
+            return "backgammon"
+        else:
+            return "gammon"
+    else:
+        return "normal"
+
+def create_player_statistics(agent_name: str) -> PlayerStatistics:
+    """Create initial player statistics."""
+    return PlayerStatistics(
+        name=agent_name,
+        invalid_moves=0,
+        total_moves=0,
+        checkers_remaining=0,
+        checkers_on_bar=0,
+        pip_count=0,
+        cube_decisions=0,
+        cube_accepts=0,
+        cube_rejects=0
+    )
 
