@@ -51,7 +51,6 @@ class Game:
             possible_moves = get_possible_moves()
             hints = get_hints()
             best_move = get_best_move()
-            # board = get_simple_board()
             logger.debug(f"Possible moves: {possible_moves}, Hints: {hints}, Best move: {best_move}")
             if turn == 0:
                 extra_input = self.agent1.filter_inputs(possible_moves, hints, best_move)
