@@ -4,7 +4,7 @@ import os
 import argparse
 import sys
 
-def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode):
+def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves=False, hints=False, best_move=False):
     """Run a single game silently and return winner"""
     # Set environment variables to pass parameters to the game
     env = os.environ.copy()
@@ -13,6 +13,9 @@ def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode):
     env['GAME_AGENT1'] = agent1
     env['GAME_AGENT2'] = agent2
     env['GAME_DEBUG_MODE'] = str(debug_mode).lower()
+    env['GAME_POSSIBLE_MOVES'] = str(possible_moves).lower()
+    env['GAME_HINTS'] = str(hints).lower()
+    env['GAME_BEST_MOVE'] = str(best_move).lower()
     
     # Redirect gnubg output to /dev/null
     with open(os.devnull, 'w') as devnull:
@@ -24,7 +27,7 @@ def run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode):
     # For now, assuming it returns 0 for player 0 win, 1 for player 1 win
     return result.returncode
 
-def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=True):
+def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=True, possible_moves=False, hints=False, best_move=False):
     """Run multiple games and show summary"""
     print(f"Running {num_games} games...")
     
@@ -35,7 +38,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
         if (i + 1) % 10 == 0:
             print(f"Progress: {i + 1}/{num_games}")
         
-        winner = run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode)
+        winner = run_silent_game(log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move)
         if winner == 0:
             agent1_wins += 1
         elif winner == 1:
@@ -64,6 +67,14 @@ def main():
     parser.add_argument('--debug_mode', '--d', action='store_true', default=True,
                         help='Enable debug mode for detailed logging (default: False)') #TODO: return debug mode to false
     
+    # Agent input configuration arguments
+    parser.add_argument('--possible_moves', '--pb', action='store_true', default=False,
+                        help='Enable possible moves input for agents')
+    parser.add_argument('--hints', '--hi', action='store_true', default=False,
+                        help='Enable hints input for agents')
+    parser.add_argument('--best_move', '--bm', action='store_true', default=False,
+                        help='Enable best move input for agents')
+    
     args = parser.parse_args()
     
     # Validate arguments
@@ -77,7 +88,10 @@ def main():
         log_folder_path=args.log_folder_path,
         agent1=args.agent1,
         agent2=args.agent2,
-        debug_mode=args.debug_mode
+        debug_mode=args.debug_mode,
+        possible_moves=args.possible_moves,
+        hints=args.hints,
+        best_move=args.best_move
     )
 
 if __name__ == "__main__":

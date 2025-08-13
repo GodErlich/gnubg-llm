@@ -1,9 +1,19 @@
 import os
+
+from .interfaces import AgentInputConfig
 from .game import Game
 from .agents import BestMoveAgent, RandomAgent, LLMAgent, LiveCodeAgent
 from .logger import Logger
 
-def create_agent(agent_type, inputs=None):
+def get_agent_input_config_from_env() -> AgentInputConfig:
+    """Get AgentInputConfig from environment variables"""
+    return AgentInputConfig(
+        possible_moves=os.getenv('GAME_POSSIBLE_MOVES', 'false').lower() == 'true',
+        hints=os.getenv('GAME_HINTS', 'false').lower() == 'true',
+        best_move=os.getenv('GAME_BEST_MOVE', 'false').lower() == 'true'
+    )
+
+def create_agent(agent_type, inputs: AgentInputConfig=None):
     """Factory function to create agents based on type string"""
     if agent_type == "BestMoveAgent":
         return BestMoveAgent(inputs=inputs)
@@ -23,13 +33,16 @@ def main():
     agent1_type = os.getenv('GAME_AGENT1', 'BestMoveAgent')
     agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
     debug_mode = os.getenv('GAME_DEBUG_MODE', 'true').lower() == 'true'
+    
+    # Get agent input configuration from environment variables
+    agent_inputs = get_agent_input_config_from_env()
 
     # Initialize logger with custom parameters
     logger = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
     
     try:
-        agent0 = create_agent(agent1_type)
-        agent1 = create_agent(agent2_type)
+        agent0 = create_agent(agent1_type, inputs=agent_inputs)
+        agent1 = create_agent(agent2_type, inputs=agent_inputs)
     except ValueError as e:
         logger.error(f"Error creating agents: {e}")
         return None
