@@ -35,9 +35,6 @@ default_prompt = """
     Lower (more negative) values indicate worse moves in this context.
     
     Begin with a brief assessment of the position and what key objectives you see.
-    
-    Conclude with your recommended move in this exact format:
-    RECOMMENDED MOVE: [best_move_here],
     """
 
 
@@ -57,7 +54,13 @@ class LLMAgent(Agent):
             hints = extra_input.get("hints", [])
             best_move = extra_input.get("best_move", None)
 
-            chosen_move_data = consult_llm(board, prompt=self.defaultPrompt, system_prompt=self.system_prompt, possible_moves=possible_moves, hints=hints, best_move=best_move)
+            answer_schema = {
+                "full_answer": "str",
+                "best_move": "str",
+            }
+            prompt_with_schema = self.defaultPrompt + "\n\nReturn as JSON with schema: {schema}"
+            chosen_move_data = consult_llm(board, prompt=prompt_with_schema, system_prompt=self.system_prompt,
+                                           possible_moves=possible_moves, hints=hints, best_move=best_move, schema=answer_schema)
 
             if chosen_move_data:
                 chosen_move = chosen_move_data
