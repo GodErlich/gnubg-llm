@@ -68,7 +68,7 @@ def main():
         stats_file = os.path.join(log_folder_path, f"{log_file_name}_stats.json")
         with open(stats_file, 'w') as f:
             json.dump(game_stats, f, indent=2)
-        logger.info(f"Statistics exported to {stats_file}")
+        logger.debug(f"Statistics exported to {stats_file}")
     except Exception as e:
         logger.error(f"Failed to export statistics: {e}")
     
