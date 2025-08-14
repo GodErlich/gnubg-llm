@@ -28,9 +28,11 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
 
     if result.stderr and result.stderr.strip():
         stderr_lower = result.stderr.lower()
-        if any(keyword in stderr_lower for keyword in ['error', 'exception', 'traceback', 'failed', 'fatal']):
+        # filter ALSA lib errors from stderr:
+        filtered_stderr = "\n".join(line for line in stderr_lower.strip().split("\n") if "alsa" not in line.lower())
+        if any(keyword in filtered_stderr for keyword in ['error', 'exception', 'traceback', 'failed', 'fatal']):
             print(f"Error in game {env.get('GAME_ID', 'unknown')}:")
-            print(result.stderr.strip())
+            print(filtered_stderr)
 
     # Return the exit code (should be winner index or error code)
     return result.returncode
