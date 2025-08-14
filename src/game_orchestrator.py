@@ -48,13 +48,18 @@ def main():
     agent_inputs = get_agent_input_config_from_env()
     prompt, system_prompt = get_prompts_from_env()
     # Initialize logger with custom parameters
-    logger = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
+    logger_instance = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
+    
+    # Also update the global logger's debug mode in case other modules use it
+    from .logger import logger as global_logger
+    if global_logger:
+        global_logger.set_debug_mode(debug_mode)
     
     try:
         agent1 = create_agent(agent1_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
         agent2 = create_agent(agent2_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
     except ValueError as e:
-        logger.error(f"Error creating agents: {e}")
+        logger_instance.error(f"Error creating agents: {e}")
         return None
 
     game = Game(agent1, agent2, game_id=game_id)
@@ -68,8 +73,8 @@ def main():
         stats_file = os.path.join(log_folder_path, f"{log_file_name}_stats.json")
         with open(stats_file, 'w') as f:
             json.dump(game_stats, f, indent=2)
-        logger.debug(f"Statistics exported to {stats_file}")
+        logger_instance.debug(f"Statistics exported to {stats_file}")
     except Exception as e:
-        logger.error(f"Failed to export statistics: {e}")
+        logger_instance.error(f"Failed to export statistics: {e}")
     
     return winner, game_stats
