@@ -42,7 +42,7 @@ def main():
     log_folder_path = os.getenv('GAME_LOG_PATH', 'output')
     agent1_type = os.getenv('GAME_AGENT1', 'BestMoveAgent')
     agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
-    debug_mode = os.getenv('GAME_DEBUG_MODE', 'true').lower() == 'true'
+    debug_mode = os.getenv('GAME_DEBUG_MODE', 'false').lower() == 'true'
     
     # Get agent input configuration from environment variables
     agent_inputs = get_agent_input_config_from_env()

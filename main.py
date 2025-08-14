@@ -29,7 +29,7 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
     # Return the exit code (should be winner index or error code)
     return result.returncode
 
-def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=True, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False):
+def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False):
     """Run multiple games and show summary with detailed statistics"""
     print(f"Running {num_games} games...")
     
