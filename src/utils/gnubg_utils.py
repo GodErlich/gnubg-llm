@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 import random
 
 
+from ..agents import Agent
 from .game_utils import is_valid_move
 from ..interfaces import Hint, PlayerStatistics
 from ..logger import logger
@@ -67,7 +68,7 @@ def default_board_representation() -> str:
 
     return f"Backgammon board state:\t{chr(9).join(board_state)}\t{on_bar}"
 
-def move_piece(curr_player, move: Optional[str] = None) -> bool:
+def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
     """Move a piece according to the move string."""
     if not move:
         logger.warning(f"Agent {curr_player} did not choose a valid move. an automatic move will be played.")
