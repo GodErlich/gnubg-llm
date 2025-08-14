@@ -24,6 +24,7 @@ class Game:
         # Initialize statistics
         self.player1_stats = create_player_statistics(str(agent1))
         self.player2_stats = create_player_statistics(str(agent2))
+        self.final_stats_captured = False
         
         if board_representation is None:
             self.board_representation = default_board_representation
@@ -33,8 +34,10 @@ class Game:
         player1_checkers = sum(board[0])
         player2_checkers = sum(board[1])
         
-        # Check if someone bore off all pieces
+        # Check if someone bore off all pieces - capture stats before returning True
         if player1_checkers == 0 or player2_checkers == 0:
+            if not self.final_stats_captured:
+                self.__capture_final_statistics()
             return True
         
         match_info = gnubg.match()
@@ -42,6 +45,8 @@ class Game:
         # Check match-level result (more reliable)
         match_result = match_info.get("match-info", {}).get("result", 0)
         if match_result != 0:  # -1 or 1 indicates someone won
+            if not self.final_stats_captured:
+                self.__capture_final_statistics()
             return True
         
         # Also check game-level winner as backup
@@ -49,6 +54,8 @@ class Game:
             latest_game = match_info["games"][-1]
             if "info" in latest_game and "winner" in latest_game["info"]:
                 if latest_game["info"]["winner"] is not None:
+                    if not self.final_stats_captured:
+                        self.__capture_final_statistics()
                     return True
                     
         return False
@@ -98,22 +105,56 @@ class Game:
             elif decision == "reject":
                 self.player2_stats["cube_rejects"] += 1
 
-    def __update_final_statistics(self, winner_index: int):
-        """Update final game statistics."""
-        # Get final board state
+    def __capture_final_statistics(self):
+        """Capture final game statistics before the game ends and board resets."""
+        # Always update the current state (allow overwriting for accuracy)
+        
+        # Get current board state
         checkers_count = get_checkers_count()
         checkers_on_bar = get_checkers_on_bar()
         pip_counts = get_pip_count()
 
-        # Update player 1 stats
-        self.player1_stats["checkers_remaining"] = checkers_count[0]
-        self.player1_stats["checkers_on_bar"] = checkers_on_bar[0]
-        self.player1_stats["pip_count"] = pip_counts[0]
+        # Only capture if we have valid data (both players have some checkers or one has 0)
+        if checkers_count[0] >= 0 and checkers_count[1] >= 0:
+            # Update player 1 stats
+            self.player1_stats["checkers_remaining"] = checkers_count[0]
+            self.player1_stats["checkers_on_bar"] = checkers_on_bar[0]
+            self.player1_stats["pip_count"] = pip_counts[0]
 
-        # Update player 2 stats
-        self.player2_stats["checkers_remaining"] = checkers_count[1]
-        self.player2_stats["checkers_on_bar"] = checkers_on_bar[1]
-        self.player2_stats["pip_count"] = pip_counts[1]
+            # Update player 2 stats
+            self.player2_stats["checkers_remaining"] = checkers_count[1]
+            self.player2_stats["checkers_on_bar"] = checkers_on_bar[1]
+            self.player2_stats["pip_count"] = pip_counts[1]
+            
+            logger.debug(f"Statistics updated - P1: {checkers_count[0]} checkers ({pip_counts[0]} pips), P2: {checkers_count[1]} checkers ({pip_counts[1]} pips)")
+            
+            # If someone has 0 checkers, mark as final capture
+            if checkers_count[0] == 0 or checkers_count[1] == 0:
+                self.final_stats_captured = True
+                logger.info(f"Final statistics captured - P1: {checkers_count[0]} checkers, P2: {checkers_count[1]} checkers")
+
+    def __check_and_capture_pre_win_stats(self):
+        """Check if someone is about to win and capture stats proactively."""
+        board = get_simple_board()
+        player1_checkers = sum(board[0])
+        player2_checkers = sum(board[1])
+        
+        # If someone has few checkers left or we're in endgame, capture stats frequently
+        min_checkers = min(player1_checkers, player2_checkers)
+        if min_checkers <= 5 or self.turn_count > 100:
+            logger.debug(f"Endgame - capturing stats - P1: {player1_checkers}, P2: {player2_checkers} checkers, turn: {self.turn_count}")
+            self.__capture_final_statistics()
+        
+        # Also capture if one player has significantly fewer checkers (bearing off phase)
+        if abs(player1_checkers - player2_checkers) >= 10:
+            logger.debug(f"Large checker difference - capturing stats - P1: {player1_checkers}, P2: {player2_checkers} checkers")
+            self.__capture_final_statistics()
+
+    def __update_final_statistics(self, winner_index: int):
+        """Update final game statistics - use already captured stats if available."""
+        # If we haven't captured final stats yet, try to capture them now
+        if not self.final_stats_captured:
+            self.__capture_final_statistics()
 
     def get_game_statistics(self, winner_index: int) -> GameStatistics:
         """Generate comprehensive game statistics."""
@@ -200,6 +241,10 @@ class Game:
             # Track move and validate
             is_valid_move = move is not None and move in possible_moves if possible_moves else move is not None
             self.__track_move(turn, move, is_valid_move)
+            
+            # Check if we should capture statistics before the move (in case this move wins the game)
+            if not self.final_stats_captured:
+                self.__check_and_capture_pre_win_stats()
             
             # Execute move
             move_piece(curr_player, move)
