@@ -95,7 +95,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
 
     # Display results
     print(f"\n{'='*60}")
-    print(f"{'DETAILED GAME RESULTS':^60}")
+    print(f"{'GAME RESULTS':^60}")
     print(f"{'='*60}")
     
     # Overall win statistics
