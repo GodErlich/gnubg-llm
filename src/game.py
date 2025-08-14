@@ -36,8 +36,6 @@ class Game:
         
         # Check if someone bore off all pieces - capture stats before returning True
         if player1_checkers == 0 or player2_checkers == 0:
-            if not self.final_stats_captured:
-                self.__capture_final_statistics()
             return True
         
         match_info = gnubg.match()
@@ -45,8 +43,6 @@ class Game:
         # Check match-level result (more reliable)
         match_result = match_info.get("match-info", {}).get("result", 0)
         if match_result != 0:  # -1 or 1 indicates someone won
-            if not self.final_stats_captured:
-                self.__capture_final_statistics()
             return True
         
         # Also check game-level winner as backup
@@ -54,8 +50,6 @@ class Game:
             latest_game = match_info["games"][-1]
             if "info" in latest_game and "winner" in latest_game["info"]:
                 if latest_game["info"]["winner"] is not None:
-                    if not self.final_stats_captured:
-                        self.__capture_final_statistics()
                     return True
                     
         return False
@@ -159,7 +153,6 @@ class Game:
     def get_game_statistics(self, winner_index: int) -> GameStatistics:
         """Generate comprehensive game statistics."""
         self.end_time = time.time()
-        self.__update_final_statistics(winner_index)
         
         loser_index = 1 - winner_index if winner_index is not None else None
         winner_checkers = self.player1_stats["checkers_remaining"] if winner_index == 0 else self.player2_stats["checkers_remaining"]
