@@ -6,7 +6,7 @@ class Logger:
     _instance = None
     _lock = threading.Lock()
     
-    def __new__(cls, log_file: str = "game", output_folder: str = "output", debug_mode: bool = True):
+    def __new__(cls, log_file: str = "game", output_folder: str = "output", debug_mode: bool = False):
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -14,7 +14,7 @@ class Logger:
                     cls._instance._initialized = False
         return cls._instance
     
-    def __init__(self, log_file: str = "game", output_folder: str = "output", debug_mode: bool = True):
+    def __init__(self, log_file: str = "game", output_folder: str = "output", debug_mode: bool = False):
         if not self._initialized:
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
@@ -45,5 +45,10 @@ class Logger:
     
     def warning(self, message: str):
         self.log(f"WARNING: {message}")
+    
+    def set_debug_mode(self, debug_mode: bool):
+        """Update the debug mode after initialization."""
+        self.debug_mode = debug_mode
 
+# Global logger instance
 logger = Logger()
