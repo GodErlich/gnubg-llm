@@ -29,7 +29,7 @@ def create_agent(agent_type, inputs: AgentInputConfig=None, prompt: str=None, sy
     elif agent_type == "LLMAgent":
         return LLMAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
     elif agent_type == "LiveCodeAgent":
-        # Note: LiveCodeAgent is not fully implemented yet. return LLM for now.
+        # Note: LiveCodeAgent is not fully implemented yet. return LLMAgent for now.
         #return LiveCodeAgent(inputs=inputs)
         return LLMAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
     else:
@@ -50,11 +50,11 @@ def main():
     # Initialize logger with custom parameters
     logger_instance = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
     
-    # Also update the global logger's debug mode in case other modules use it
+    # update the global logger's debug mode
     from .logger import logger as global_logger
     if global_logger:
         global_logger.set_debug_mode(debug_mode)
-    
+
     try:
         agent1 = create_agent(agent1_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
         agent2 = create_agent(agent2_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
@@ -64,7 +64,6 @@ def main():
 
     game = Game(agent1, agent2, game_id=game_id)
 
-    # Play the game
     winner, game_stats = game.play()
     
     # Export statistics to JSON file
