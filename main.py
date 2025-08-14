@@ -20,11 +20,17 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
     env['GAME_PROMPT'] = prompt or ""
     env['GAME_SYSTEM_PROMPT'] = system_prompt or ""
     
-    # Redirect gnubg output to /dev/null
+    # Redirect gnubg stdout to /dev/null but capture stderr to check for exceptions
     with open(os.devnull, 'w') as devnull:
         result = subprocess.run([
             "gnubg", "-t", "-p", "app.py"
-        ], stdout=devnull, stderr=devnull, capture_output=False, env=env)
+        ], stdout=devnull, stderr=subprocess.PIPE, text=True, env=env)
+
+    if result.stderr and result.stderr.strip():
+        stderr_lower = result.stderr.lower()
+        if any(keyword in stderr_lower for keyword in ['error', 'exception', 'traceback', 'failed', 'fatal']):
+            print(f"Error in game {env.get('GAME_ID', 'unknown')}:")
+            print(result.stderr.strip())
 
     # Return the exit code (should be winner index or error code)
     return result.returncode
