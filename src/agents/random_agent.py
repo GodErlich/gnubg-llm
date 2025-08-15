@@ -14,19 +14,9 @@ class RandomAgent(Agent):
     def choose_move(self, board, extra_input: AgentInput = None):
         """ choose a random move from the possible moves """
         possible_moves = extra_input.get("possible_moves", [])
-        move = self.random_move(possible_moves)
+        move = RandomAgent._random_move(possible_moves)
         logger.debug(f"Random Move: {move}")
         return move
-
-    def random_move(self, possible_moves):
-        """ makes a random move based on possible moves"""
-        if not possible_moves or len(possible_moves) == 0:
-            logger.info("No possible moves found")
-            return None
-
-        random_index = random.randint(0, len(possible_moves) - 1)
-
-        return possible_moves[random_index]
 
     def handle_invalid_move(self, invalid_move: str) -> str:
         """RandomAgent tries another random move."""
@@ -42,3 +32,14 @@ class RandomAgent(Agent):
 
         logger.warning("RandomAgent could not handle invalid move")
         return None
+
+    @staticmethod
+    def _random_move(possible_moves):
+        """ makes a random move based on possible moves"""
+        if not possible_moves or len(possible_moves) == 0:
+            logger.info("No possible moves found")
+            return None
+
+        random_index = random.randint(0, len(possible_moves) - 1)
+
+        return possible_moves[random_index]
