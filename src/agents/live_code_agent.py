@@ -54,10 +54,6 @@ def select_best_move():
 
 Only return the Python code, no explanations outside the code.
 """
-
-            answer_schema = {
-                "python_code": "str"
-            }
             
             llm_response = consult_llm(
                 board, 
@@ -66,15 +62,14 @@ Only return the Python code, no explanations outside the code.
                 possible_moves=possible_moves, 
                 hints=hints, 
                 best_move=best_move,
-                schema=answer_schema
             )
             logger.debug(f"LLM response: {llm_response}")
 
-            if not llm_response or "python_code" not in llm_response:
+            if not llm_response:
                 logger.warning("No valid code returned by LLM")
                 return None
             
-            python_code = llm_response["python_code"]
+            python_code = llm_response
             logger.debug(f"Generated Python code: {python_code}")
             
             # Execute the generated code safely
