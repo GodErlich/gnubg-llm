@@ -147,9 +147,9 @@ The utils module has been restructured into separate files for better organizati
 - **[`game_utils.py`](src/utils/game_utils.py:1)** - Game-specific utility functions for dice rolling, move generation, and game state management.
 
 ### Agents Directory ([`src/agents/`](src/agents/))
-- **[`base.py`](src/agents/base.py:1)** - Abstract base class defining the agent interface and input filtering mechanism.
+- **[`base.py`](src/agents/base.py:1)** - Abstract base class defining the agent interface, input filtering mechanism, and invalid move handling contract. All agents must implement both [`choose_move()`](src/agents/base.py:18) and [`handle_invalid_move()`](src/agents/base.py:22) methods.
 - **[`random_agent.py`](src/agents/random_agent.py:1)** - Simple agent that selects random valid moves from available options.
-- **[`best_move_agent.py`](src/agents/best_move_agent.py:1)** - Development agent that logs detailed game state information while making random moves.
+- **[`best_move_agent.py`](src/agents/best_move_agent.py:1)** - Agent that always selects the gnubg engine's best move.
 - **[`llm_agent.py`](src/agents/llm_agent.py:1)** - AI agent that uses external LLM APIs to analyze positions and select moves based on strategic reasoning. Supports custom prompts and response schemas for structured output.
 - **[`live_code_agent.py`](src/agents/live_code_agent.py:1)** - Experimental agent that asks an LLM to generate Python code for move selection and executes it dynamically.
 - **[`__init__.py`](src/agents/__init__.py:1)** - Package initialization file that exports all agent classes.
@@ -167,8 +167,9 @@ The project follows this execution flow:
    - Determines current player
    - Rolls dice using gnubg
    - Gets available moves, hints, and best moves from gnubg
-   - Calls agent's [`choose_move()`](src/agents/base.py:23) method
-   - Validates and executes the chosen move
+   - Calls agent's [`choose_move()`](src/agents/base.py:18) method
+   - Validates and executes the chosen move using [`move_piece()`](src/utils/gnubg_utils.py:71) with retry logic
+   - If move is invalid, calls agent's [`handle_invalid_move()`](src/agents/base.py:22) method up to `MAX_RETIRES` times
    - Repeats until game ends or max turns reached
 6. **Agent Decision**: Each agent type implements its own strategy:
    - **RandomAgent**: Picks randomly from valid moves
@@ -232,7 +233,12 @@ Executes a checker move using gnubg's move notation. The move command accepts va
 - Must bear off legally when in home board and no checkers behind
 
 #### Error Handling:
-If an invalid move is provided, gnubg will ignore the command. Always use [`move_piece()`](src/utils/gnubg_utils.py:161) which includes error handling.
+If an invalid move is provided, the [`move_piece()`](src/utils/gnubg_utils.py:71) function implements a robust retry system:
+- Validates move format using [`is_valid_move()`](src/utils/game_utils.py) before execution
+- Calls agent's [`handle_invalid_move()`](src/agents/base.py:22) method when move is invalid
+- Retries up to 3 times with agent-provided replacement moves
+- Falls back to [`force_move()`](src/utils/gnubg_utils.py:150) (gnubg auto play) if all attempts fail
+- If `force_move` fails, the game throws an error and stops.
 
 ### gnubg.hint()
 Returns detailed move analysis including:
@@ -269,8 +275,18 @@ The agent will decide what to do with the above input + additional text(prompt),
 ## Create new agents
 If you want to add a new agent with different behavior, add a new file called "your_agent_name.py" to the agents folder under src, then add the import in the __init__.py file inside the agents folder.
 In this file create an Agent class (for reference look into random_agent.py), lastly customize the
-functions `choose_move`, `handle_invalid_move` as you wish.
+functions `choose_move` and `handle_invalid_move` as you wish.
 Add the agent class to the `create_agent` factory function in [`game_orchestrator.py`](src/game_orchestrator.py)
+
+## Agent Invalid Move Handling System
+
+The project implements a robust invalid move handling system that gives each agent full control over how to respond to invalid moves.
+
+1. **Move Validation**: [`move_piece()`](src/utils/gnubg_utils.py:71) validates each move using [`is_valid_move()`](src/utils/game_utils.py) before execution
+2. **Agent Control**: When a move is invalid, the agent's [`handle_invalid_move()`](src/agents/base.py:22) method is called
+3. **Retry Logic**: The system retries up to `MAX_RETRIES` times with agent-provided replacement moves
+4. **Fallback**: If all attempts fail, [`force_move()`](src/utils/gnubg_utils.py:150) triggers auto play
+
 
 ## Custom Board Representation
 
