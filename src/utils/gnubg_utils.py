@@ -69,27 +69,35 @@ def default_board_representation() -> str:
     return f"Backgammon board state:\t{chr(9).join(board_state)}\t{on_bar}"
 
 def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
-    """Move a piece according to the move string."""
-    if not move:
-        logger.warning(f"Agent {curr_player} did not choose a valid move. an automatic move will be played.")
-        move = random_valid_move()
-        if not move:
-            logger.warning("No valid move found, forcing gnubg to play.")
-            gnubg.command("play")
-            return False
-    # Validate move format before attempting to execute
-    if not is_valid_move(move):
-        logger.warning(f"Invalid move format: '{move}', forcing gnubg to play.")
-        gnubg.command(f"move {move}")
-        return False
+    """Move a piece according to the move string with retry logic."""
+    max_retries = 3
+    current_move = move
+    
+    for attempt in range(max_retries):        
+        try:
+            if is_valid_move(current_move):
+                gnubg.command(f"move {current_move}")
+                return True
+            else:
+                logger.warning(f"Invalid move format: '{current_move}' (attempt {attempt + 1})")
+                current_move = curr_player.handle_invalid_move(current_move, "Invalid move format")
+        except Exception as e:
+            logger.error(f"Error at move_piece '{current_move}': {e} (attempt {attempt + 1})")
+            try:
+                current_move = curr_player.handle_invalid_move(current_move, str(e))
+            except Exception as agent_error:
+                logger.error(f"Error in agent's handle_invalid_move: {agent_error}")
+                break
+
+    # after all retries or if handle_invalid_move failed, force gnubg to play
+    logger.error(f"Agent {curr_player} failed to provide a valid move after {max_retries} attempts. or handle_invalid_move failed. Forcing gnubg to play.")
     try:
-        gnubg.command(f"move {move}")
-        return True
-    except Exception as e:
-        logger.error(f"Error moving piece, forcing gnubg to play: {e}")
         gnubg.command("play")
-        return False
-   
+    except Exception as e:
+        logger.error(f"Error forcing gnubg to play: {e}")
+        raise RuntimeError(f"Failed to execute move and gnubg auto play also failed. {e}")
+    return False
+
 
 def get_possible_moves() -> List[str]:
     try:

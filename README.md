@@ -263,19 +263,14 @@ Agent will get as input these parameters:
 2. board and all possible moves
 3. board + hints
 4. board + best possible move
-
-
-The agent will decide what to do with the above input + additional text(prompt), and will output a valid move
-1. use gnubg engine only ( it will ignore the prompt)
-2. use llm to decide
-3. let an llm write code to solve the problem at hand
+The agent will decide what to do with the above input + additional text(prompt), and will output a move accordingly.
 
 
 ## Create new agents
 If you want to add a new agent with different behavior, add a new file called "your_agent_name.py" to the agents folder under src, then add the import in the __init__.py file inside the agents folder.
-Add the agent class to the create_agent function in [`game_orchestrator.py`](src/game_orchestrator.py)
 In this file create an Agent class (for reference look into random_agent.py), lastly customize the
-function choose_move as you wish.
+functions `choose_move`, `handle_invalid_move` as you wish.
+Add the agent class to the `create_agent` factory function in [`game_orchestrator.py`](src/game_orchestrator.py)
 
 ## Custom Board Representation
 

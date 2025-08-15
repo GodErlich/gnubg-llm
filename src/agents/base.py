@@ -16,7 +16,11 @@ class Agent(ABC):
 
     @abstractmethod
     def choose_move(self, board, possible_moves=None, hints=None, prompt=None):
-        pass
+        raise NotImplementedError("Subclasses must implement choose_move method")
+
+    @abstractmethod
+    def handle_invalid_move(self, invalid_move: str) -> str:
+        raise NotImplementedError("Subclasses must implement handle_invalid_move method")
 
     def filter_inputs(self, possible_moves, hints, best_move):
         """Filter inputs based on the agent's configuration. DO NOTs use this method"""
