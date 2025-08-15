@@ -80,22 +80,19 @@ def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
                 return True
             else:
                 logger.warning(f"Invalid move format: '{current_move}' (attempt {attempt + 1})")
-                current_move = curr_player.handle_invalid_move(current_move, "Invalid move format")
+                current_move = curr_player.handle_invalid_move(current_move)
         except Exception as e:
-            logger.error(f"Error at move_piece '{current_move}': {e} (attempt {attempt + 1})")
+            logger.warning(f"Error at move_piece '{current_move}': {e} (attempt {attempt + 1})")
             try:
-                current_move = curr_player.handle_invalid_move(current_move, str(e))
+                current_move = curr_player.handle_invalid_move(current_move)
             except Exception as agent_error:
                 logger.error(f"Error in agent's handle_invalid_move: {agent_error}")
-                break
+                force_move()
+                return False
 
     # after all retries or if handle_invalid_move failed, force gnubg to play
-    logger.error(f"Agent {curr_player} failed to provide a valid move after {max_retries} attempts. or handle_invalid_move failed. Forcing gnubg to play.")
-    try:
-        gnubg.command("play")
-    except Exception as e:
-        logger.error(f"Error forcing gnubg to play: {e}")
-        raise RuntimeError(f"Failed to execute move and gnubg auto play also failed. {e}")
+    logger.error(f"Agent {curr_player} failed to provide a valid move after {max_retries} attempts.")
+    force_move()
     return False
 
 
@@ -150,6 +147,15 @@ def random_valid_move():
     
     return all_moves[0]
 
+def force_move():
+    """Force gnubg to play an automatic move. used when all other methods fail"""
+    try:
+        logger.warning("Force automatic play. This is not supposed to happen.")
+        gnubg.command("play")
+    except Exception as e:
+        logger.error(f"Error forcing gnubg to play: {e}")
+        raise RuntimeError(f"Failed to execute move and gnubg auto play also failed. {e}")
+
 
 def is_cube_decision() -> bool:
     """Check if current position requires a cube decision."""
@@ -165,9 +171,8 @@ def handle_cube_decision() -> bool:
             
     except Exception as e:
         logger.error(f"Error handling cube decision: {e}")
-        # Fallback - let gnubg decide
         try:
-            gnubg.command("play")
+            force_move()
             return True
         except:
             return False
