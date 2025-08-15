@@ -8,6 +8,9 @@ from .game_utils import is_valid_move
 from ..interfaces import Hint, PlayerStatistics
 from ..logger import logger
 
+
+MAX_RETRIES = 3
+
 def get_dice() -> Tuple[int, int]:
     """Get the current dice rolled."""
     posinfo = gnubg.posinfo()
@@ -27,11 +30,10 @@ def reverse_board(board: Tuple[int, int]) -> Tuple[int, int]:
     return tuple(reversed_board)
 
 
-
-"""
-    returns the board as a tuple. first tuple represents current player, second represents other player.
-"""
 def get_simple_board() -> Tuple[Tuple[int, ...], Tuple[int, ...]]:
+    """
+        returns the board as a tuple. first tuple represents current player, second represents other player.
+    """
     return gnubg.board()
 
 def get_board() -> Tuple[Tuple[int, ...], Tuple[int, ...]]:
@@ -70,10 +72,9 @@ def default_board_representation() -> str:
 
 def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
     """Move a piece according to the move string with retry logic."""
-    max_retries = 3
     current_move = move
     
-    for attempt in range(max_retries):        
+    for attempt in range(MAX_RETRIES):        
         try:
             if is_valid_move(current_move):
                 gnubg.command(f"move {current_move}")
@@ -91,7 +92,7 @@ def move_piece(curr_player: Agent, move: Optional[str] = None) -> bool:
                 return False
 
     # after all retries or if handle_invalid_move failed, force gnubg to play
-    logger.error(f"Agent {curr_player} failed to provide a valid move after {max_retries} attempts.")
+    logger.error(f"Agent {curr_player} failed to provide a valid move after {MAX_RETRIES} attempts.")
     force_move()
     return False
 
