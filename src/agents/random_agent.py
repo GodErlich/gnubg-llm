@@ -1,6 +1,7 @@
 import random
 from .base import Agent
 from ..interfaces import AgentInputConfig, AgentInput
+from ..utils.gnubg_utils import random_valid_move
 from ..logger import logger
 
 
@@ -26,3 +27,18 @@ class RandomAgent(Agent):
         random_index = random.randint(0, len(possible_moves) - 1)
 
         return possible_moves[random_index]
+
+    def handle_invalid_move(self, invalid_move: str) -> str:
+        """RandomAgent tries another random move."""
+        logger.debug(f"RandomAgent handling invalid move: '{invalid_move}'")
+
+        try:
+            new_random_move = random_valid_move()
+            if new_random_move:
+                logger.debug(f"RandomAgent falling back to a random move: {new_random_move}")
+                return new_random_move
+        except Exception as e:
+            logger.warning(f"Failed to get new random move: {e}")
+
+        logger.warning("RandomAgent could not handle invalid move")
+        return None
