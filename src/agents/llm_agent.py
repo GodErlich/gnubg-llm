@@ -1,6 +1,7 @@
 from .base import Agent
 from ..interfaces import AgentInputConfig, AgentInput
 from ..utils import consult_llm
+from ..utils.gnubg_utils import get_best_move, random_valid_move
 from ..logger import logger
 
 default_prompt = """
@@ -75,3 +76,29 @@ class LLMAgent(Agent):
 
             logger.error(traceback.format_exc())
             return None
+
+    def handle_invalid_move(self, invalid_move: str) -> str:
+        """LLM agent tries to use best move, then random, then None if all fail."""
+        logger.debug(f"LLM agent handling invalid move: '{invalid_move}'")
+
+        # First try the best move according to gnubg
+        try:
+            best_move = get_best_move()
+            if best_move:
+                logger.debug(f"LLM agent falling back to best move: {best_move}")
+                return best_move
+        except Exception as e:
+            logger.warning(f"Failed to get best move: {e}")
+        
+        # If best move fails, try a random valid move
+        try:
+            random_move = random_valid_move()
+            if random_move:
+                logger.debug(f"LLM agent falling back to a random move: {random_move}")
+                return random_move
+        except Exception as e:
+            logger.warning(f"Failed to get random move: {e}")
+        
+        # If everything fails, return None to trigger gnubg auto play
+        logger.warning("LLM agent could not handle invalid move")
+        return None

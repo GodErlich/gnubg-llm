@@ -1,3 +1,4 @@
+import sys
 import time
 import os
 import threading
@@ -29,9 +30,6 @@ class Logger:
         
         with open(self.log_file, "a") as f:
             f.write(log_entry)
-        
-        if self.debug_mode:
-            print(f"[{timestamp}] - {message}")
     
     def debug(self, message: str):
         if self.debug_mode:
@@ -42,7 +40,8 @@ class Logger:
     
     def error(self, message: str):
         self.log(f"ERROR: {message}")
-    
+        print(f"{message}", file=sys.stderr)
+
     def warning(self, message: str):
         self.log(f"WARNING: {message}")
     

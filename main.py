@@ -20,14 +20,23 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
     env['GAME_PROMPT'] = prompt or ""
     env['GAME_SYSTEM_PROMPT'] = system_prompt or ""
     
-    # Redirect gnubg output to /dev/null
+    # Redirect gnubg stdout to /dev/null but capture stderr to check for exceptions
     with open(os.devnull, 'w') as devnull:
         result = subprocess.run([
             "gnubg", "-t", "-p", "app.py"
-        ], stdout=devnull, stderr=devnull, capture_output=False, env=env)
+        ], stdout=devnull, stderr=subprocess.PIPE, text=True, env=env)
+
+    if result.stderr and result.stderr.strip():
+        stderr_lower = result.stderr.lower()
+        # filter ALSA lib errors from stderr:
+        filtered_stderr = "\n".join(line for line in stderr_lower.strip().split("\n") if "alsa" not in line.lower())
+        if any(keyword in filtered_stderr for keyword in ['error', 'exception', 'traceback', 'failed', 'fatal']):
+            print(f"Error in game {env.get('GAME_ID', 'unknown')}:")
+            print(filtered_stderr)
+            return None, filtered_stderr  # Indicate an error occurred
 
     # Return the exit code (should be winner index or error code)
-    return result.returncode
+    return result.returncode, None
 
 def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False):
     """Run multiple games and show summary with detailed statistics"""
@@ -51,9 +60,17 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
         if game_id % 10 == 0:
             print(f"Progress: {game_id}/{num_games}")
         
-        winner = run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move, prompt, system_prompt)
-        
-        # Read game statistics from log file if available
+        winner, err = run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move, prompt, system_prompt)                
+        if winner is None or err is not None:
+            game_results.append({
+                "game_id": game_id,
+                "winner": None,
+                "winner_name": "Unknown",
+                "loser_name": "Unknown",
+                "error": err
+            })
+            continue
+
         stats_file = os.path.join(log_folder_path, f"{log_file_name}_{game_id}_stats.json")
         
         game_result = {
@@ -105,7 +122,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
     
     # Game-by-game results
     print(f"\n📊 GAME-BY-GAME RESULTS:")
-    print(f"{'Game':<4} {'Winner':<12} {'Loser':<12} {'Duration':<8} {'Turns':<6} {'Invalid Moves (P1/P2)':<20} {'Checkers Left (Loser)':<18} {'Type':<10}")
+    print(f"{'Game':<4} {'Winner':<12} {'Loser':<12} {'Duration':<8} {'Turns':<6} {'Invalid Moves (P1/P2)':<20} {'Checkers Left (Loser)':<18} {'Type':<10} {'Error':<10}")
     print(f"{'-'*100}")
     
     for result in game_results:
@@ -127,9 +144,9 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
             loser_checkers = result.get("player1_stats", {}).get("checkers_remaining", "N/A")
             
         game_type = result.get('game_type', 'N/A')
-        
-        print(f"{game_id:<4} {winner_name:<12} {loser_name:<12} {duration:<8} {turns:<6} {invalid_moves:<20} {loser_checkers:<18} {game_type:<10}")
-    
+        error = result.get('error', 'N/A')
+
+        print(f"{game_id:<4} {winner_name:<12} {loser_name:<12} {duration:<8} {turns:<6} {invalid_moves:<20} {loser_checkers:<18} {game_type:<10} {error:<10}")
     # Aggregate statistics
     if num_games > 0:
         print(f"\n📈 AGGREGATE STATISTICS:")
@@ -158,7 +175,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
                 # Write header
                 writer.writerow([
                     'Game_ID', 'Winner', 'Loser', 'Winner_Agent', 'Loser_Agent',
-                    'Duration_Seconds', 'Total_Turns', 'Game_Type',
+                    'Duration_Seconds', 'Total_Turns', 'Game_Type', 'Error',
                     'P1_Invalid_Moves', 'P1_Total_Moves', 'P1_Checkers_Remaining', 'P1_Checkers_On_Bar', 'P1_Pip_Count',
                     'P2_Invalid_Moves', 'P2_Total_Moves', 'P2_Checkers_Remaining', 'P2_Checkers_On_Bar', 'P2_Pip_Count',
                     'Final_Score_Difference'
@@ -178,6 +195,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
                         result.get("game_duration", ""),
                         result.get("total_turns", ""),
                         result.get("game_type", ""),
+                        result.get("error", ""),
                         p1_stats.get("invalid_moves", ""),
                         p1_stats.get("total_moves", ""),
                         p1_stats.get("checkers_remaining", ""),
