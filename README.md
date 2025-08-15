@@ -199,7 +199,7 @@ Executes any gnubg command. Common commands used in this project:
 - `"set player 1 human"` - Sets player 1 to human control
 - `"roll"` - Rolls the dice
 - `"move X/Y"` - Moves a checker from point X to point Y
-- `"play"` - Makes an automatic move
+- `"play"` - Makes an automatic move as last resort. If it's called something went wrong.
 
 ### gnubg.command('move move_cmd')
 Executes a checker move using gnubg's move notation. The move command accepts various formats:
