@@ -69,7 +69,8 @@ Only return the Python code, no explanations outside the code.
                 logger.warning("No valid code returned by LLM")
                 return None
             
-            python_code = llm_response
+            # Extract Python code from markdown if present
+            python_code = self._extract_python_code(llm_response)
             logger.debug(f"Generated Python code: {python_code}")
             
             # Execute the generated code safely
@@ -88,9 +89,42 @@ Only return the Python code, no explanations outside the code.
             logger.error(traceback.format_exc())
             return None
 
+    def _extract_python_code(self, response: str) -> str:
+        """Extract Python code from markdown code blocks or plain text."""
+        if not response:
+            return ""
+        
+        # Check if response contains markdown code blocks
+        python_block_pattern = r'```python\s*\n(.*?)```'
+        code_block_pattern = r'```\s*\n(.*?)```'
+        
+        # Try to find Python-specific code block first
+        python_match = re.search(python_block_pattern, response, re.DOTALL)
+        if python_match:
+            extracted = python_match.group(1).strip()
+            logger.debug(f"Extracted Python code from ```python block: {extracted[:100]}...")
+            return extracted
+        
+        # Try to find any code block
+        code_match = re.search(code_block_pattern, response, re.DOTALL)
+        if code_match:
+            extracted = code_match.group(1).strip()
+            logger.debug(f"Extracted code from ``` block: {extracted[:100]}...")
+            return extracted
+        
+        # If no code blocks found, return the response as-is (might be plain code)
+        logger.debug(f"No code blocks found, using response as-is: {response[:100]}...")
+        return response.strip()
+
     def _execute_code_safely(self, python_code: str, possible_moves: list, best_move: str) -> str:
         """Safely execute the generated Python code and extract the move."""
         try:
+            if not python_code or not python_code.strip():
+                logger.warning("Empty Python code provided")
+                return None
+            
+            logger.debug(f"About to execute code: {python_code[:200]}...")
+            
             # Create a restricted execution environment
             safe_globals = {
                 '__builtins__': {
@@ -105,23 +139,39 @@ Only return the Python code, no explanations outside the code.
                     'sorted': sorted,
                     'enumerate': enumerate,
                     'range': range,
+                    'print': print,  # Allow print for debugging
                 }
             }
             
             # Execute the code in the safe environment
             exec(python_code, safe_globals)
+            logger.debug(f"Code executed successfully. Available functions: {[k for k in safe_globals.keys() if callable(safe_globals.get(k))]}")
             
             # Call the function if it exists
             if 'select_best_move' in safe_globals:
+                logger.debug("Found select_best_move function, calling it...")
                 result = safe_globals['select_best_move']()
+                logger.debug(f"Function returned: {result} (type: {type(result)})")
+                
                 if isinstance(result, str) and result.strip():
-                    return result.strip()
+                    final_move = result.strip()
+                    logger.debug(f"Returning valid move: {final_move}")
+                    return final_move
+                else:
+                    logger.warning(f"Function returned invalid result: {result}")
+            else:
+                available_funcs = [k for k in safe_globals.keys() if callable(safe_globals.get(k))]
+                logger.warning(f"Function 'select_best_move' not found. Available functions: {available_funcs}")
             
-            logger.warning("Function 'select_best_move' not found or returned invalid result")
             return None
             
+        except SyntaxError as e:
+            logger.error(f"Syntax error in generated code: {e}")
+            logger.error(f"Problematic code:\n{python_code}")
+            return None
         except Exception as e:
             logger.error(f"Error executing generated code: {e}")
+            logger.error(f"Code that failed:\n{python_code}")
             return None
 
     def handle_invalid_move(self, invalid_move: str) -> str:
