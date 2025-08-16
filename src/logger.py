@@ -9,7 +9,7 @@ class Logger:
     _instance = None
     _lock = threading.Lock()
     
-    def __new__(cls, log_file: str = "game", output_folder: str = "output", debug_mode: bool = False):
+    def __new__(cls, log_file: str = "game", output_folder: str = "output", debug_mode: bool = False, json_format: bool = False):
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -39,7 +39,7 @@ class Logger:
             }
             log_entry = json.dumps(log_data, ensure_ascii=False) + "\n"
         else:
-            # Handle multi-line messages by converting to single line
+            # Change multi-line messages to a single line
             clean_message = self._clean_message(message)
             log_entry = f"[{timestamp}] - {level}: {clean_message}\n"
         
@@ -53,11 +53,7 @@ class Logger:
         
         # Replace newlines with literal \n
         clean = message.replace('\n', '\\n').replace('\r', '\\r')
-        
-        # Replace multiple spaces/tabs with single space
-        clean = re.sub(r'\s+', ' ', clean)
-        
-        # Trim whitespace
+                
         clean = clean.strip()
         
         return clean
@@ -71,7 +67,7 @@ class Logger:
     
     def error(self, message: str):
         self.log("ERROR", message)
-        # Also print to stderr for immediate visibility
+        # Print to stderr for to let the main process catch the error.
         clean_message = self._clean_message(message)
         print(f"ERROR: {clean_message}", file=sys.stderr)
 
@@ -89,10 +85,8 @@ class Logger:
     def log_multiline(self, level: str, message: str, preserve_formatting: bool = False):
         """Log a multi-line message with option to preserve formatting."""
         if preserve_formatting and self.json_format:
-            # In JSON mode, preserve the original formatting
             self.log(level, message)
         elif preserve_formatting:
-            # In text mode with formatting preserved, log each line separately
             timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
             lines = message.split('\n')
             with open(self.log_file, "a", encoding='utf-8') as f:
@@ -102,8 +96,7 @@ class Logger:
                     else:
                         f.write(f"[{timestamp}] - {level}_CONT: {line}\n")
         else:
-            # Use the standard cleaning approach
             self.log(level, message)
 
-# Global logger instance
+# Global logger for simple import
 logger = Logger()
