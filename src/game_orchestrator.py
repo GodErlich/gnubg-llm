@@ -41,17 +41,19 @@ def main():
     agent1_type = os.getenv('GAME_AGENT1', 'BestMoveAgent')
     agent2_type = os.getenv('GAME_AGENT2', 'RandomAgent')
     debug_mode = os.getenv('GAME_DEBUG_MODE', 'false').lower() == 'true'
+    json_logs = os.getenv('GAME_JSON_LOGS', 'false').lower() == 'true'
     
     # Get agent input configuration from environment variables
     agent_inputs = get_agent_input_config_from_env()
     prompt, system_prompt = get_prompts_from_env()
     # Initialize logger with custom parameters
-    logger_instance = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode)
+    logger_instance = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode, json_format=json_logs)
     
-    # update the global logger's debug mode
+    # update the global logger's debug mode and JSON format
     from .logger import logger as global_logger
     if global_logger:
         global_logger.set_debug_mode(debug_mode)
+        global_logger.set_json_format(json_logs)
 
     try:
         agent1 = create_agent(agent1_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)

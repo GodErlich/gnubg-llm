@@ -4,7 +4,7 @@ import os
 import argparse
 import sys
 
-def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None):
+def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, json_logs=False):
     """Run a single game silently and return winner and statistics"""
     # Set environment variables to pass parameters to the game
     env = os.environ.copy()
@@ -19,6 +19,7 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
     env['GAME_BEST_MOVE'] = str(best_move).lower()
     env['GAME_PROMPT'] = prompt or ""
     env['GAME_SYSTEM_PROMPT'] = system_prompt or ""
+    env['GAME_JSON_LOGS'] = str(json_logs).lower()
     
     # Redirect gnubg stdout to /dev/null but capture stderr to check for exceptions
     with open(os.devnull, 'w') as devnull:
@@ -38,7 +39,7 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
     # Return the exit code (should be winner index or error code)
     return result.returncode, None
 
-def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False):
+def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False, json_logs=False):
     """Run multiple games and show summary with detailed statistics"""
     print(f"Running {num_games} games...")
     
@@ -60,7 +61,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
         if game_id % 10 == 0:
             print(f"Progress: {game_id}/{num_games}")
         
-        winner, err = run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move, prompt, system_prompt)                
+        winner, err = run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves, hints, best_move, prompt, system_prompt, json_logs)                
         if winner is None or err is not None:
             game_results.append({
                 "game_id": game_id,
@@ -246,6 +247,8 @@ def main():
                         help='Enable best move input for agents')
     parser.add_argument('--export_csv', '--csv', action='store_true', default=False,
                         help='Export detailed statistics to CSV file')
+    parser.add_argument('--json_logs', '--json', action='store_true', default=False,
+                        help='Use JSON format for logs (better for parsing)')
     
     args = parser.parse_args()
     
@@ -266,7 +269,8 @@ def main():
         possible_moves=args.possible_moves,
         hints=args.hints,
         best_move=args.best_move,
-        export_csv=args.export_csv
+        export_csv=args.export_csv,
+        json_logs=args.json_logs
     )
 
 if __name__ == "__main__":
