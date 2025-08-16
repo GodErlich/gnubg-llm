@@ -73,12 +73,15 @@ There are several parameters that can be passed to the program.
   --possible_moves, --pm Enable possible moves input for agents
   --hints, --hi         Enable hints input for agents
   --best_move, --bm     Enable best move input for agents
+  --json_logs, --json   Use JSON format for logs (better for parsing)
 
 ### Examples:
 - `python3 main.py --a1 RandomAgent --a2 RandomAgent --n 3 --d`
   Will run 3 games with RandomAgent vs RandomAgent and debug logs.
 - `python3 main.py --a1 LLMAgent --a2 BestMoveAgent --p "Play aggressively" --sp "You are a backgammon expert" --pm --hi`
   Will run LLM agent with custom prompts and additional input (possible moves and hints).
+- `python3 main.py --a1 LiveCodeAgent --a2 RandomAgent --pm --hi --bm --d --json`
+  Will run LiveCodeAgent with all inputs and JSON-formatted logs for easier parsing.
 
 ## Notice!
 To run Agents that use LLM you have to create a .env file with your parameters.
@@ -99,6 +102,14 @@ Control what information is provided to agents:
 - `--possible_moves` (`--pm`): Provides list of all valid moves
 - `--hints` (`--hi`): Provides move quality hints and evaluations
 - `--best_move` (`--bm`): Provides the engine's recommended best move
+
+### Logging Options
+Configure log output format for easier parsing:
+- `--json_logs` (`--json`): Output logs in JSON format for easier programmatic parsing
+- Standard format: `[2025-08-16 00:52:45] - DEBUG: Generated Python code: def select_best_move():\n    return "24/23"`
+- JSON format: `{"timestamp": "2025-08-16 00:52:45", "level": "DEBUG", "message": "Generated Python code: def select_best_move():\n    return \"24/23\""}`
+
+JSON logs preserve original formatting including newlines and make it easier to parse log data programmatically.
 
 ## Important Files Explanations
 
