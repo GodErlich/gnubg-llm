@@ -29,9 +29,7 @@ def create_agent(agent_type, inputs: AgentInputConfig=None, prompt: str=None, sy
     elif agent_type == "LLMAgent":
         return LLMAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
     elif agent_type == "LiveCodeAgent":
-        # Note: LiveCodeAgent is not fully implemented yet. return LLMAgent for now.
-        #return LiveCodeAgent(inputs=inputs)
-        return LLMAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
+        return LiveCodeAgent(inputs=inputs, prompt=prompt, system_prompt=system_prompt)
     else:
         raise ValueError(f"Unknown agent type: {agent_type}")
 
