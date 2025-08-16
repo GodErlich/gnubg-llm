@@ -1,7 +1,7 @@
 from .base import Agent
 from ..interfaces import AgentInputConfig, AgentInput
 from ..utils import consult_llm
-from ..utils.gnubg_utils import random_valid_move, get_best_move
+from ..utils.gnubg_utils import get_board, random_valid_move
 from ..logger import logger
 import re
 
@@ -17,51 +17,51 @@ class LiveCodeAgent(Agent):
     def choose_move(self, board, extra_input: AgentInput = None):
         """Use live code to select a move."""
         try:
+            tuple_board = get_board()
             possible_moves = extra_input.get("possible_moves", []) if extra_input else []
             hints = extra_input.get("hints", []) if extra_input else []
             best_move = extra_input.get("best_move", None) if extra_input else None
             
             # Create a comprehensive prompt for code generation
             create_code_prompt = f"""
-You are an expert backgammon player. Write Python code to analyze the board and select the best move.
+                You are an expert backgammon player. Write Python code to analyze the board and select the best move.
 
-Current board state: {board}
-Available moves: {possible_moves}
-Move hints with equity: {hints}
-Engine's best move: {best_move}
+                Current board state: {board}
+                Available moves: {possible_moves}
 
-Write a Python function that analyzes this information and returns the best move as a string.
-The function must be named 'select_best_move' and should:
-1. Take no parameters 
-2. Return a move string in gnubg format (e.g., "24/22" or "13/9 24/22")
-3. Choose from the available moves list if provided
-4. Include your reasoning as comments
+                Write a Python function that analyzes this information and returns the best move as a string.
+                The function must be named 'select_best_move' and should:
+                1. Take no parameters 
+                2. Return a move string in gnubg format (e.g., "24/22" or "13/9 24/22")
+                3. Choose from the available moves list if provided
+                4. Include your reasoning as comments
 
-Example format:
-```python
-def select_best_move():
-    # Analysis of the position
-    available = {possible_moves}
-    hints = {hints}
-    best = "{best_move}"
-    
-    # Your strategic reasoning here
-    if available:
-        # Choose from available moves based on strategy
-        return available[0]  # or your chosen move
-    return best if best else None
-```
+                Example format:
+                ```python
+                def select_best_move():
+                    # Analysis of the position
+                    tuple_board = {tuple_board}
+                    available = {possible_moves}
+                    move = None
 
-Only return the Python code, no explanations outside the code.
-"""
+                    # Your strategic reasoning here
+                    if available:
+                        # Calculate the best move from available and tuple_board
+                        return available[0]  # or your chosen move
+                    return move
+                ```
+
+                Only return the Python code, no explanations outside the code.
+                """
             
             llm_response = consult_llm(
                 board, 
                 prompt=create_code_prompt, 
                 system_prompt=self.system_prompt,
                 possible_moves=possible_moves, 
-                hints=hints, 
+                hints=hints,
                 best_move=best_move,
+                tuple_board=tuple_board
             )
             logger.debug(f"LLM response: {llm_response}")
 
