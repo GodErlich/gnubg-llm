@@ -12,43 +12,5 @@
                 "PYTHONPATH": "${workspaceFolder}"
             }
         },
-        {
-            "name": "Python: App",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/app.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            }
-        },
-        {
-            "name": "GNU Backgammon: App Debug",
-            "type": "python",
-            "request": "launch",
-            "program": "gnubg",
-            "args": ["-t", "-p", "${workspaceFolder}/app.py"],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            }
-        },
-        {
-            "name": "GNU Backgammon: Remote Debug",
-            "type": "python",
-            "request": "attach",
-            "connect": {
-                "host": "localhost",
-                "port": 5678
-            },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "${workspaceFolder}"
-                }
-            ]
-        }
     ]
 }
