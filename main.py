@@ -4,40 +4,61 @@ import os
 import argparse
 import sys
 
+def _build_game_env(game_id, log_file_name, log_folder_path, agent1, agent2, 
+                   debug_mode, possible_moves, hints, best_move, prompt, 
+                   system_prompt, json_logs):
+    """Build environment variables for game execution"""
+    env = os.environ.copy()
+    env.update({
+        'GAME_ID': str(game_id),
+        'GAME_LOG_FILE': f"{log_file_name}_{game_id}",
+        'GAME_LOG_PATH': log_folder_path,
+        'GAME_AGENT1': agent1,
+        'GAME_AGENT2': agent2,
+        'GAME_DEBUG_MODE': str(debug_mode).lower(),
+        'GAME_POSSIBLE_MOVES': str(possible_moves).lower(),
+        'GAME_HINTS': str(hints).lower(),
+        'GAME_BEST_MOVE': str(best_move).lower(),
+        'GAME_PROMPT': prompt or "",
+        'GAME_SYSTEM_PROMPT': system_prompt or "",
+        'GAME_JSON_LOGS': str(json_logs).lower()
+    })
+    return env
+
 def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, debug_mode, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, json_logs=False):
     """Run a single game silently and return winner and statistics"""
-    # Set environment variables to pass parameters to the game
-    env = os.environ.copy()
-    env['GAME_ID'] = str(game_id)
-    env['GAME_LOG_FILE'] = f"{log_file_name}_{game_id}"
-    env['GAME_LOG_PATH'] = log_folder_path
-    env['GAME_AGENT1'] = agent1
-    env['GAME_AGENT2'] = agent2
-    env['GAME_DEBUG_MODE'] = str(debug_mode).lower()
-    env['GAME_POSSIBLE_MOVES'] = str(possible_moves).lower()
-    env['GAME_HINTS'] = str(hints).lower()
-    env['GAME_BEST_MOVE'] = str(best_move).lower()
-    env['GAME_PROMPT'] = prompt or ""
-    env['GAME_SYSTEM_PROMPT'] = system_prompt or ""
-    env['GAME_JSON_LOGS'] = str(json_logs).lower()
+    env = _build_game_env(game_id, log_file_name, log_folder_path, agent1, agent2,
+                         debug_mode, possible_moves, hints, best_move, prompt,
+                         system_prompt, json_logs)
     
-    # Redirect gnubg stdout to /dev/null but capture stderr to check for exceptions
-    with open(os.devnull, 'w') as devnull:
-        result = subprocess.run([
-            "gnubg", "-t", "-p", "app.py"
-        ], stdout=devnull, stderr=subprocess.PIPE, text=True, env=env)
+    try:
+        # Suppress gnubg stdout but capture stderr for error checking
+        with open(os.devnull, 'w') as devnull:
+            result = subprocess.run([
+                "gnubg", "-t", "-p", "app.py"
+            ], stdout=devnull, stderr=subprocess.PIPE, text=True, env=env, timeout=1200)
+        
+        # Check for actual errors in stderr (filter out noise)
+        if result.stderr and result.stderr.strip():
+            error_lines = [line for line in result.stderr.strip().split("\n") 
+                          if "alsa" not in line.lower()]  # Filter ALSA warnings
+            
+            if error_lines and any(keyword in "\n".join(error_lines).lower() 
+                                 for keyword in ['error', 'exception', 'traceback', 'failed', 'fatal']):
+                error_msg = "\n".join(error_lines)
+                print(f"Error in game {game_id}: {error_msg}")
+                return None, error_msg
 
-    if result.stderr and result.stderr.strip():
-        stderr_lower = result.stderr.lower()
-        # filter ALSA lib errors from stderr:
-        filtered_stderr = "\n".join(line for line in stderr_lower.strip().split("\n") if "alsa" not in line.lower())
-        if any(keyword in filtered_stderr for keyword in ['error', 'exception', 'traceback', 'failed', 'fatal']):
-            print(f"Error in game {env.get('GAME_ID', 'unknown')}:")
-            print(filtered_stderr)
-            return None, filtered_stderr  # Indicate an error occurred
-
-    # Return the exit code (should be winner index or error code)
-    return result.returncode, None
+        return result.returncode, None
+        
+    except subprocess.TimeoutExpired:
+        error_msg = f"Game {game_id} timed out after 20 minutes"
+        print(error_msg)
+        return None, error_msg
+    except Exception as e:
+        error_msg = f"Failed to run game {game_id}: {str(e)}"
+        print(error_msg)
+        return None, error_msg
 
 def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False, json_logs=False):
     """Run multiple games and show summary with detailed statistics"""
