@@ -34,7 +34,7 @@ install-gnubg: ## Install GNU Backgammon via apt
 install-python: ## Install Python dependencies
 	@echo "$(YELLOW)🐍 Installing Python dependencies...$(NC)"
 	@if [ -f "requirements.txt" ]; then \
-		pip3 --user install -r requirements.txt; \
+		pip3 install --user -r requirements.txt; \
 		echo "$(GREEN)✅ Python dependencies installed$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠️ No requirements.txt found, skipping Python dependencies$(NC)"; \
