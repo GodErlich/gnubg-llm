@@ -62,6 +62,7 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
 
 def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False, json_logs=False):
     """Run multiple games and show summary with detailed statistics"""
+    print(f"full and summary logs will be saved in the folder: {log_folder_path}")
     print(f"Running {num_games} games...")
     
     agent1_wins = 0
