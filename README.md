@@ -58,7 +58,7 @@ The agent will decide what to do with the above input + additional text(prompt),
 For detailed information, please refer to the following documentation:
 
 - **[📦 Installation Guide](docs/INSTALL.md)** - Complete installation instructions, prerequisites, and setup requirements
-- **[📖 How to Use](docs/HOW_TO_USE.md)** - Comprehensive usage guide with all command-line options and configuration details
+- **[📖 How to Use](docs/HOW_TO_USE.md)** - Comprehensive usage guide with all command-line options, configuration details and evaluation guide
 - **[🔧 Development Guide](docs/DEVELOPMENT.md)** - Development information, file explanations, project architecture, and how to create custom agents
 
 ## Notice!

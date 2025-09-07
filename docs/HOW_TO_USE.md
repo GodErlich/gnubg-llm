@@ -102,34 +102,45 @@ Agents can receive different levels of information based on configuration:
 
 The agent will decide what to do with the above input plus additional text (prompt), and will output a move accordingly.
 
-## Move Notation
+## Game Run Evaluation Script
 
-The system uses GNU Backgammon's move notation:
+This script (`evaluate_runs.py`) evaluates backgammon games based on files inside `run_timestamp` folders, using the `game_stats.json` files to create comprehensive analysis similar to the `game_results` functionality in [`main.py`](main.py).
 
-### Basic Move Formats:
-- **Single Move**: `"move 24/22"` - Move one checker from point 24 to point 22
-- **Multiple Moves**: `"move 13/11 8/6"` - Move one checker from 13 to 11 AND one checker from 8 to 6
-- **Same Point Multiple Moves**: `"move 6/4 6/4"` - Move two checkers from point 6 to point 4
-- **Parenthetical Notation**: `"move 8/5(2)"` - Move two checkers from point 8 to point 5
-- **Mixed Parenthetical**: `"move 13/10 8/5(3)"` - Move one checker from 13 to 10 AND three checkers from 8 to 5
+### Basic Usage
 
-### Special Move Notations:
-- **Hit and Move**: `"move 24/22*"` - Move from 24 to 22 and hit opponent's checker (the `*` indicates a hit)
-- **Move from Bar**: `"move bar/22"` - Move a checker from the bar to point 22
-- **Bear Off**: `"move 6/off"` - Bear off a checker from point 6 (when in bearing off phase)
+```bash
+# Analyze all runs with detailed output
+python3 evaluate_runs.py
 
-### Advanced Move Examples:
-- **Complex Multi-Move**: `"move 13/11 24/22 8/6 6/4"` - Four separate moves in one turn (when doubles are rolled)
-- **Hit and Continue**: `"move 24/22*/20"` - Move from 24 to 22 (hitting), then continue same checker to 20
-- **Multiple Hits**: `"move 24/18*/17*"` - Move from 24 to 18 (hitting), then continue to 17 (hitting again)
-- **Bar to Hit**: `"move bar/22*"` - Move from bar to point 22 and hit opponent's checker
-- **Bar Multiple Hits**: `"move bar/20*/19*"` - Move from bar to 20 (hitting), then continue to 19 (hitting again)
-- **Hit with Multiple Checkers**: `"move 8/2*(2)"` - Move two checkers from 8 to 2 and hit opponent's checker
-- **Mixed Complex**: `"move 10/4(2) 8/2*(2)"` - Move 2 checkers from 10 to 4 AND move 2 checkers from 8 to 2 (hitting)
+# Analyze specific run folder
+python3 evaluate_runs.py --run run_20250907_185349
 
-### Move Validation:
-- Moves must correspond to dice rolled (e.g., with dice 3,2 you can move 3 and 2 points)
-- Cannot move to points occupied by 2+ opponent checkers
-- Must move from bar first if any checkers are on the bar
-- Must bear off legally when in home board and no checkers behind
+# Analyze all runs with comparison and quiet output
+python3 evaluate_runs.py --compare --quiet
+```
 
+
+### Command Line Options
+
+- `--output_dir DIR` or `--dir DIR`: Directory containing run folders (default: `output`)
+- `--run_folder RUN` or `--run RUN`: Analyze specific run folder
+- `--compare` or `--comp`: Compare performance across runs
+- `--quiet` or `--q`: Suppress detailed output, show summary only
+
+### Game-by-Game Results
+Similar to [`main.py`](main.py:156-181) format:
+- Game ID, Winner, Loser
+- Duration, Turns
+- Invalid moves (P1/P2)
+- Checkers remaining for loser
+- Game type (normal/gammon/backgammon)
+
+### Aggregate Statistics
+- Average game duration and turns
+- Total and rate of invalid moves per agent
+- Game type distribution
+
+### Run Comparison (with `--compare`)
+- Performance comparison across multiple runs
+- Best performers identification
+- Average game speed analysis
