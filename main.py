@@ -3,9 +3,10 @@ import subprocess
 import os
 import argparse
 import sys
+import time
 
-def _build_game_env(game_id, log_file_name, log_folder_path, agent1, agent2, 
-                   debug_mode, possible_moves, hints, best_move, prompt, 
+def _build_game_env(game_id, log_file_name, log_folder_path, agent1, agent2,
+                   debug_mode, possible_moves, hints, best_move, prompt,
                    system_prompt, json_logs):
     """Build environment variables for game execution"""
     env = os.environ.copy()
@@ -62,7 +63,15 @@ def run_silent_game(game_id, log_file_name, log_folder_path, agent1, agent2, deb
 
 def run_batch_games(num_games, log_file_name="game", log_folder_path="output", agent1="BestMoveAgent", agent2="RandomAgent", debug_mode=False, possible_moves=False, hints=False, best_move=False, prompt=None, system_prompt=None, export_csv=False, json_logs=False):
     """Run multiple games and show summary with detailed statistics"""
-    print(f"full and summary logs will be saved in the folder: {log_folder_path}")
+    # Create a distinct folder for this batch run
+    run_timestamp = time.strftime('%Y%m%d_%H%M%S')
+    base_log_folder = log_folder_path
+    os.makedirs(base_log_folder, exist_ok=True)
+    run_folder_name = f"run_{run_timestamp}"
+    log_folder_path = os.path.join(base_log_folder, run_folder_name)
+    os.makedirs(log_folder_path, exist_ok=True)
+    print(f"Run folder created: {log_folder_path}")
+    print(f"Logs file are saved in: {log_folder_path}")
     print(f"Running {num_games} games...")
     
     agent1_wins = 0
@@ -190,7 +199,7 @@ def run_batch_games(num_games, log_file_name="game", log_folder_path="output", a
     if export_csv and game_results:
         try:
             import csv
-            csv_file = os.path.join(log_folder_path, f"{log_file_name}_summary.csv")
+            csv_file = os.path.join(log_folder_path, f"summary.csv")
             
             with open(csv_file, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)

@@ -6,8 +6,8 @@ from .agents import Agent
 from .utils import (default_board_representation, get_dice, get_simple_board, get_possible_moves, 
                    move_piece, roll_dice, get_hints, get_best_move, map_winner, is_cube_decision, 
                    handle_cube_decision, get_pip_count, get_checkers_count, get_checkers_on_bar, 
-                   determine_game_type, create_player_statistics)
-from .interfaces import GameStatistics, PlayerStatistics
+                   determine_game_type, create_player_statistics, is_valid_move)
+from .interfaces import GameStatistics
 from .logger import logger
 
 class Game:
@@ -73,7 +73,7 @@ class Game:
         logger.warning("No winner found in match info.")
         return None
 
-    def __track_move(self, player_num: int, move: str, is_valid: bool):
+    def __track_move(self, player_num: int, is_valid: bool):
         """Track move statistics for a player."""
         if player_num == 0:
             self.player1_stats["total_moves"] += 1
@@ -232,8 +232,8 @@ class Game:
                 move = self.agent2.choose_move(board, extra_input)
             
             # Track move and validate
-            is_valid_move = move is not None and move in possible_moves if possible_moves else move is not None
-            self.__track_move(turn, move, is_valid_move)
+            is_valid = move is not None and move in possible_moves if possible_moves else move is not None
+            self.__track_move(turn, is_valid)
             
             # Check if we should capture statistics before the move (in case this move wins the game)
             if not self.final_stats_captured:

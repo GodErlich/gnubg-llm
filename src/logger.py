@@ -21,7 +21,8 @@ class Logger:
         if not self._initialized:
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
-            log_file_name = f"{log_file}_{time.strftime('%Y%m%d_%H%M%S')}.txt"
+
+            log_file_name = f"{log_file}_logs.txt"
             self.log_file = os.path.join(output_folder, log_file_name)
             self.debug_mode = debug_mode
             self.json_format = json_format
@@ -81,6 +82,15 @@ class Logger:
     def set_json_format(self, json_format: bool):
         """Update the JSON format mode after initialization."""
         self.json_format = json_format
+
+    def set_log_file(self, log_file: str, output_folder: str):
+        """Update the log file path after initialization."""
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        
+        log_file_name = f"{log_file}_logs.txt"
+        
+        self.log_file = os.path.join(output_folder, log_file_name)
     
     def log_multiline(self, level: str, message: str, preserve_formatting: bool = False):
         """Log a multi-line message with option to preserve formatting."""

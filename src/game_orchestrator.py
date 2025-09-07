@@ -49,11 +49,12 @@ def main():
     # Initialize logger with custom parameters
     logger_instance = Logger(log_file=log_file_name, output_folder=log_folder_path, debug_mode=debug_mode, json_format=json_logs)
     
-    # update the global logger's debug mode and JSON format
+    # update the global logger's debug mode, JSON format, and log file path
     from .logger import logger as global_logger
     if global_logger:
         global_logger.set_debug_mode(debug_mode)
         global_logger.set_json_format(json_logs)
+        global_logger.set_log_file(log_file_name, log_folder_path)
 
     try:
         agent1 = create_agent(agent1_type, inputs=agent_inputs, prompt=prompt, system_prompt=system_prompt)
